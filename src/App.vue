@@ -1,19 +1,19 @@
 <template>
-  <v-app>
+  <v-app class="portfolio-app">
     <!-- Toolbar -->
-    <v-app-bar flat color="white" border="b">
+    <v-app-bar flat color="white" border="b" class="px-2">
       <v-app-bar-title class="d-flex align-center">
-        <v-icon icon="mdi-palette" class="mr-2" color="primary"></v-icon>
-        <span class="font-weight-bold">{{ $t('app.title') }}</span>
-        <v-chip v-if="store.isDirty" size="x-small" color="warning" class="ml-2">●</v-chip>
+        <v-icon icon="mdi-palette" class="mr-2" color="primary" size="large"></v-icon>
+        <span class="text-h6 font-weight-bold">{{ $t('app.title') }}</span>
+        <v-chip v-if="store.isDirty" size="x-small" color="warning" class="ml-2" variant="flat">●</v-chip>
       </v-app-bar-title>
       
       <v-spacer></v-spacer>
       
       <!-- Language Switcher -->
-      <v-btn-toggle v-model="locale" mandatory variant="outlined" density="compact" class="mr-3">
-        <v-btn value="en" size="small">EN</v-btn>
-        <v-btn value="zh" size="small">中文</v-btn>
+      <v-btn-toggle v-model="locale" mandatory variant="outlined" density="compact" class="mr-3" rounded="lg">
+        <v-btn value="en" size="small" variant="flat">EN</v-btn>
+        <v-btn value="zh" size="small" variant="flat">中文</v-btn>
       </v-btn-toggle>
 
       <v-btn variant="tonal" color="primary" class="mr-2" @click="showTemplates = true">
@@ -32,85 +32,199 @@
       </v-btn>
     </v-app-bar>
 
-    <v-main class="bg-grey-lighten-4">
+    <v-main class="bg-grey-lighten-5">
       <v-container fluid class="pa-0">
-        <v-row no-gutters>
+        <v-row no-gutters class="fill-height">
           <!-- Editor Sidebar -->
           <v-col cols="12" md="4" lg="3" class="editor-sidebar">
-            <v-card class="ma-3" rounded="lg" elevation="2">
-              <v-card-title class="text-subtitle-1 font-weight-bold pb-0">
-                {{ $t('editor.basicInfo') }}
-              </v-card-title>
-              <v-card-text>
-                <v-text-field v-model="store.portfolio.name" @update:model-value="store.saveToLocalStorage()" 
-                  :label="$t('editor.name')" variant="outlined" density="compact" hide-details class="mb-2"></v-text-field>
-                <v-text-field v-model="store.portfolio.title" @update:model-value="store.saveToLocalStorage()" 
-                  :label="$t('editor.title')" variant="outlined" density="compact" hide-details class="mb-2"></v-text-field>
-                <v-textarea v-model="store.portfolio.bio" @update:model-value="store.saveToLocalStorage()" 
-                  :label="$t('editor.bio')" variant="outlined" density="compact" rows="2" hide-details class="mb-2"></v-textarea>
-                <v-text-field v-model="store.portfolio.location" @update:model-value="store.saveToLocalStorage()" 
-                  :label="$t('editor.location')" variant="outlined" density="compact" hide-details class="mb-2"></v-text-field>
-                <v-text-field v-model="store.portfolio.email" @update:model-value="store.saveToLocalStorage()" 
-                  :label="$t('editor.email')" variant="outlined" density="compact" hide-details></v-text-field>
-              </v-card-text>
-            </v-card>
+            <div class="pa-3 pb-6">
+              <!-- Profile Card -->
+              <v-card class="mb-3" rounded="xl" elevation="0" border>
+                <v-card-item>
+                  <template v-slot:prepend>
+                    <v-avatar color="primary" variant="tonal" size="40">
+                      <v-icon icon="mdi-account"></v-icon>
+                    </v-avatar>
+                  </template>
+                  <v-card-title class="text-body-1 font-weight-bold pa-0">{{ $t('editor.basicInfo') }}</v-card-title>
+                </v-card-item>
+                <v-card-text class="pt-2">
+                  <v-text-field 
+                    v-model="store.portfolio.name" 
+                    @update:model-value="store.saveToLocalStorage()" 
+                    :label="$t('editor.name')" 
+                    variant="outlined" 
+                    density="comfortable" 
+                    hide-details 
+                    class="mb-2"
+                    prepend-inner-icon="mdi-account"
+                  ></v-text-field>
+                  <v-text-field 
+                    v-model="store.portfolio.title" 
+                    @update:model-value="store.saveToLocalStorage()" 
+                    :label="$t('editor.title')" 
+                    variant="outlined" 
+                    density="comfortable" 
+                    hide-details 
+                    class="mb-2"
+                    prepend-inner-icon="mdi-briefcase"
+                  ></v-text-field>
+                  <v-textarea 
+                    v-model="store.portfolio.bio" 
+                    @update:model-value="store.saveToLocalStorage()" 
+                    :label="$t('editor.bio')" 
+                    variant="outlined" 
+                    density="comfortable" 
+                    rows="2" 
+                    hide-details 
+                    class="mb-2"
+                    prepend-inner-icon="mdi-text"
+                  ></v-textarea>
+                  <v-text-field 
+                    v-model="store.portfolio.location" 
+                    @update:model-value="store.saveToLocalStorage()" 
+                    :label="$t('editor.location')" 
+                    variant="outlined" 
+                    density="comfortable" 
+                    hide-details 
+                    class="mb-2"
+                    prepend-inner-icon="mdi-map-marker"
+                  ></v-text-field>
+                  <v-text-field 
+                    v-model="store.portfolio.email" 
+                    @update:model-value="store.saveToLocalStorage()" 
+                    :label="$t('editor.email')" 
+                    variant="outlined" 
+                    density="comfortable" 
+                    hide-details
+                    prepend-inner-icon="mdi-email"
+                  ></v-text-field>
+                </v-card-text>
+              </v-card>
 
-            <!-- Projects -->
-            <v-card class="ma-3" rounded="lg" elevation="2">
-              <v-card-title class="d-flex justify-space-between align-center pb-0">
-                <span class="text-subtitle-1 font-weight-bold">{{ $t('editor.projects') }}</span>
-                <v-btn size="small" color="primary" variant="tonal" @click="addProject">
-                  <v-icon icon="mdi-plus" class="mr-1"></v-icon>
-                  {{ $t('editor.addProject') }}
-                </v-btn>
-              </v-card-title>
-              <v-card-text>
-                <v-slide-y-transition group>
-                  <v-card v-for="(p, idx) in store.portfolio.projects" :key="p.id" variant="outlined" class="mb-2" rounded="lg">
-                    <v-card-text class="pb-2">
-                      <v-text-field v-model="p.title" @update:model-value="saveProject(idx)" 
-                        label="Project Title" variant="outlined" density="compact" hide-details class="mb-1"></v-text-field>
-                      <v-textarea v-model="p.description" @update:model-value="saveProject(idx)" 
-                        label="Description" variant="outlined" density="compact" rows="2" hide-details class="mb-1"></v-textarea>
-                      <v-text-field v-model="p.link" @update:model-value="saveProject(idx)" 
-                        label="Project URL" variant="outlined" density="compact" hide-details class="mb-1"></v-text-field>
-                      <v-text-field v-model="p.tagsStr" @update:model-value="saveProject(idx)" 
-                        label="Tags (comma separated)" variant="outlined" density="compact" hide-details></v-text-field>
-                    </v-card-text>
-                    <v-card-actions class="pt-0">
-                      <v-spacer></v-spacer>
-                      <v-btn size="small" color="error" variant="text" @click="store.removeProject(p.id)">
-                        <v-icon icon="mdi-delete"></v-icon>
-                      </v-btn>
-                    </v-card-actions>
-                  </v-card>
-                </v-slide-y-transition>
-              </v-card-text>
-            </v-card>
+              <!-- Projects Card -->
+              <v-card class="mb-3" rounded="xl" elevation="0" border>
+                <v-card-item>
+                  <template v-slot:prepend>
+                    <v-avatar color="amber" variant="tonal" size="40">
+                      <v-icon icon="mdi-briefcase-outline"></v-icon>
+                    </v-avatar>
+                  </template>
+                  <v-card-title class="text-body-1 font-weight-bold pa-0">
+                    {{ $t('editor.projects') }}
+                  </v-card-title>
+                  <template v-slot:append>
+                    <v-btn size="small" color="primary" variant="tonal" @click="addProject" rounded="lg">
+                      <v-icon icon="mdi-plus" size="small"></v-icon>
+                    </v-btn>
+                  </template>
+                </v-card-item>
+                <v-card-text class="pt-2">
+                  <v-slide-y-transition group tag="div">
+                    <v-card 
+                      v-for="(p, idx) in store.portfolio.projects" 
+                      :key="p.id" 
+                      variant="outlined" 
+                      class="mb-2" 
+                      rounded="lg"
+                      elevation="0"
+                    >
+                      <v-card-text class="pb-2">
+                        <v-text-field 
+                          v-model="p.title" 
+                          @update:model-value="saveProject(idx)" 
+                          label="Project Title" 
+                          variant="plain" 
+                          density="compact" 
+                          hide-details 
+                          class="mb-1"
+                        ></v-text-field>
+                        <v-textarea 
+                          v-model="p.description" 
+                          @update:model-value="saveProject(idx)" 
+                          label="Description" 
+                          variant="plain" 
+                          density="compact" 
+                          rows="2" 
+                          hide-details 
+                          class="mb-1"
+                        ></v-textarea>
+                        <v-text-field 
+                          v-model="p.link" 
+                          @update:model-value="saveProject(idx)" 
+                          label="Project URL" 
+                          variant="plain" 
+                          density="compact" 
+                          hide-details 
+                          class="mb-1"
+                        ></v-text-field>
+                        <v-text-field 
+                          v-model="p.tagsStr" 
+                          @update:model-value="saveProject(idx)" 
+                          label="Tags (comma separated)" 
+                          variant="plain" 
+                          density="compact" 
+                          hide-details
+                        ></v-text-field>
+                      </v-card-text>
+                      <v-divider></v-divider>
+                      <v-card-actions class="pt-1 pb-1">
+                        <v-spacer></v-spacer>
+                        <v-btn size="small" color="error" variant="text" @click="store.removeProject(p.id)" icon="mdi-delete" density="compact"></v-btn>
+                      </v-card-actions>
+                    </v-card>
+                  </v-slide-y-transition>
+                  <div v-if="!store.portfolio.projects.length" class="text-center py-4 text-grey">
+                    <v-icon icon="mdi-folder-open-outline" size="large" class="mb-2"></v-icon>
+                    <div class="text-body-2">No projects yet</div>
+                  </div>
+                </v-card-text>
+              </v-card>
 
-            <!-- Skills -->
-            <v-card class="ma-3" rounded="lg" elevation="2">
-              <v-card-title class="d-flex justify-space-between align-center pb-0">
-                <span class="text-subtitle-1 font-weight-bold">{{ $t('editor.skills') }}</span>
-                <v-btn size="small" color="primary" variant="tonal" @click="addSkill">
-                  <v-icon icon="mdi-plus" class="mr-1"></v-icon>
-                  {{ $t('editor.addSkill') }}
-                </v-btn>
-              </v-card-title>
-              <v-card-text>
-                <v-chip-group>
-                  <v-chip v-for="s in store.portfolio.skills" :key="s.name" closable @click:close="store.removeSkill(s.name)">
-                    {{ s.name }}
-                  </v-chip>
-                </v-chip-group>
-              </v-card-text>
-            </v-card>
+              <!-- Skills Card -->
+              <v-card class="mb-3" rounded="xl" elevation="0" border>
+                <v-card-item>
+                  <template v-slot:prepend>
+                    <v-avatar color="green" variant="tonal" size="40">
+                      <v-icon icon="mdi-cog-outline"></v-icon>
+                    </v-avatar>
+                  </template>
+                  <v-card-title class="text-body-1 font-weight-bold pa-0">
+                    {{ $t('editor.skills') }}
+                  </v-card-title>
+                  <template v-slot:append>
+                    <v-btn size="small" color="primary" variant="tonal" @click="addSkill" rounded="lg">
+                      <v-icon icon="mdi-plus" size="small"></v-icon>
+                    </v-btn>
+                  </template>
+                </v-card-item>
+                <v-card-text class="pt-2">
+                  <v-chip-group>
+                    <v-chip 
+                      v-for="s in store.portfolio.skills" 
+                      :key="s.name" 
+                      closable 
+                      @click:close="store.removeSkill(s.name)"
+                      variant="tonal"
+                      color="primary"
+                      rounded="lg"
+                    >
+                      {{ s.name }}
+                    </v-chip>
+                  </v-chip-group>
+                  <div v-if="!store.portfolio.skills.length" class="text-center py-4 text-grey">
+                    <v-icon icon="mdi-star-outline" size="large" class="mb-2"></v-icon>
+                    <div class="text-body-2">No skills yet</div>
+                  </div>
+                </v-card-text>
+              </v-card>
+            </div>
           </v-col>
 
           <!-- Preview -->
           <v-col cols="12" md="8" lg="9">
             <div class="pa-3" style="height: calc(100vh - 64px); overflow-y: auto;">
-              <v-card rounded="lg" elevation="4" class="preview-card">
+              <v-card rounded="xl" elevation="8" class="preview-card overflow-hidden">
                 <v-fade-transition mode="out-in">
                   <component :is="currentTemplate" :key="store.portfolio.template" />
                 </v-fade-transition>
@@ -122,12 +236,12 @@
     </v-main>
 
     <!-- Template Dialog -->
-    <v-dialog v-model="showTemplates" max-width="800">
-      <v-card rounded="xl">
-        <v-card-title class="text-h5 font-weight-bold pa-4">
+    <v-dialog v-model="showTemplates" max-width="700" scrim="black">
+      <v-card rounded="xl" elevation="24">
+        <v-card-title class="text-h5 font-weight-bold pa-5 pb-2">
           {{ $t('templates.choose') }}
         </v-card-title>
-        <v-card-text>
+        <v-card-text class="px-5 pb-5">
           <v-row>
             <v-col v-for="t in templates" :key="t.id" cols="6" md="4">
               <v-card 
@@ -136,15 +250,25 @@
                 rounded="lg" 
                 elevation="0"
                 border
-                class="pa-2 cursor-pointer"
+                class="pa-2 cursor-pointer transition-swing"
+                hover
               >
-                <div :class="['template-preview', t.previewClass]" style="height: 120px; border-radius: 8px;"></div>
-                <div class="text-center mt-2 font-weight-medium">{{ $t(`templates.${t.id}`) }}</div>
+                <v-img 
+                  :class="['template-preview', t.previewClass]" 
+                  height="100" 
+                  cover
+                  class="rounded-lg mb-2"
+                >
+                  <div class="d-flex align-center justify-center h-full">
+                    <v-icon :icon="t.icon" size="32" color="white" style="opacity: 0.7;"></v-icon>
+                  </div>
+                </v-img>
+                <div class="text-center text-body-2 font-weight-medium">{{ $t(`templates.${t.id}`) }}</div>
               </v-card>
             </v-col>
           </v-row>
         </v-card-text>
-        <v-card-actions>
+        <v-card-actions class="pa-5 pt-0">
           <v-spacer></v-spacer>
           <v-btn variant="text" @click="showTemplates = false">Close</v-btn>
         </v-card-actions>
@@ -154,7 +278,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePortfolioStore } from './stores/portfolio'
 import MinimalTemplate from './components/Preview/templates/MinimalTemplate.vue'
@@ -168,11 +292,11 @@ const store = usePortfolioStore()
 const showTemplates = ref(false)
 
 const templates = [
-  { id: 'minimal', previewClass: 'bg-gradient-to-br from-gray-800 to-gray-900' },
-  { id: 'creative', previewClass: 'bg-gradient-to-br from-purple-600 to-pink-500' },
-  { id: 'professional', previewClass: 'bg-gradient-to-br from-slate-800 to-slate-900' },
-  { id: 'developer', previewClass: 'bg-gradient-to-br from-gray-900 to-green-900' },
-  { id: 'designer', previewClass: 'bg-gradient-to-br from-rose-500 to-orange-400' }
+  { id: 'minimal', previewClass: 'bg-gradient-to-br from-gray-700 to-gray-900', icon: 'mdi-text-box-outline' },
+  { id: 'creative', previewClass: 'bg-gradient-to-br from-purple-500 to-pink-500', icon: 'mdi-palette' },
+  { id: 'professional', previewClass: 'bg-gradient-to-br from-blue-grey-700 to-blue-grey-900', icon: 'mdi-domain' },
+  { id: 'developer', previewClass: 'bg-gradient-to-br from-green-800 to-green-950', icon: 'mdi-code-tags' },
+  { id: 'designer', previewClass: 'bg-gradient-to-br from-amber-400 to-orange-500', icon: 'mdi-brush' }
 ]
 
 const currentTemplate = computed(() => {
@@ -188,7 +312,6 @@ const currentTemplate = computed(() => {
 
 onMounted(() => { 
   store.loadFromLocalStorage() 
-  // Convert tags array to string for editing
   store.portfolio.projects.forEach(p => {
     (p as any).tagsStr = p.tags.join(', ')
   })
@@ -238,22 +361,52 @@ const exportPDF = async () => {
 </script>
 
 <style scoped>
+.portfolio-app {
+  font-family: 'Inter', 'Noto Sans SC', system-ui, sans-serif !important;
+}
+
 .editor-sidebar {
   max-height: calc(100vh - 64px);
   overflow-y: auto;
+  background: rgb(var(--v-theme-grey-lighten-5));
 }
+
 .template-card {
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .template-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transform: translateY(-6px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
 }
 .template-card.selected {
   border-color: rgb(var(--v-theme-primary)) !important;
-  box-shadow: 0 0 0 2px rgb(var(--v-theme-primary));
+  box-shadow: 0 0 0 3px rgba(var(--v-theme-primary), 0.2), 0 8px 25px rgba(0,0,0,0.15) !important;
 }
+.template-card.selected .template-preview {
+  box-shadow: inset 0 0 0 3px rgb(var(--v-theme-primary));
+}
+
 .preview-card {
   overflow: hidden;
+  border-radius: 16px;
+}
+
+.transition-swing {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Smooth scrollbar */
+.editor-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+.editor-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.editor-sidebar::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.15);
+  border-radius: 3px;
+}
+.editor-sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0,0,0,0.25);
 }
 </style>
