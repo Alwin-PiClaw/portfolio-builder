@@ -6,88 +6,96 @@ export function usePdfExport(
 ) {
   const exportPdf = async () => {
     try {
-      const previewElement = document.querySelector('.preview-card') as HTMLElement
-      if (!previewElement) {
+      // Find the preview card
+      const previewCard = document.querySelector('.preview-card') as HTMLElement
+      if (!previewCard) {
         showSnackbar('No preview found', 'error')
         return
       }
 
       showSnackbar('Preparing PDF...', 'info')
 
-      // Clone the element
-      const clone = previewElement.cloneNode(true) as HTMLElement
+      // Clone and clean the element for printing
+      const clone = previewCard.cloneNode(true) as HTMLElement
       
-      // Remove all style attributes and classes that might cause issues
-      clone.querySelectorAll('*').forEach((el: Element) => {
+      // Apply print-friendly styles inline
+      const applyPrintStyles = (el: Element) => {
         const htmlEl = el as HTMLElement
+        // Get computed styles
+        const computed = window.getComputedStyle(el)
         
-        // Get computed styles and apply as inline styles
-        const originalEl = previewElement.querySelector(`[data-id="${htmlEl.getAttribute('data-id')}"]`) || 
-                          Array.from(previewElement.querySelectorAll('*')).find(e => e === el)
-        if (originalEl) {
-          const computed = window.getComputedStyle(originalEl as Element)
-          
-          // Apply solid colors instead of CSS variables
-          const props = ['color', 'backgroundColor', 'background', 'borderColor']
-          props.forEach(prop => {
-            const value = computed.getPropertyValue(prop)
-            if (value && !value.includes('var(') && !value.includes('rgb(a)?')) {
-              try {
-                htmlEl.style.setProperty(prop, value)
-              } catch (e) {}
+        // Copy essential styles only
+        const essentialStyles = [
+          'font-family', 'font-size', 'font-weight', 'color', 
+          'background', 'background-color',
+          'padding', 'margin', 'text-align', 'display', 'flex',
+          'border', 'border-radius', 'width', 'height'
+        ]
+        
+        essentialStyles.forEach(prop => {
+          try {
+            const val = computed.getPropertyValue(prop)
+            if (val && val !== '' && !val.includes('var(') && !val.includes('color(')) {
+              htmlEl.style.setProperty(prop, val)
             }
-          })
-        }
+          } catch (e) {}
+        })
         
-        // Remove problematic CSS
+        // Remove classes
         htmlEl.removeAttribute('class')
-        htmlEl.style.cssText = `
-          font-family: Arial, sans-serif;
-          color: #333333;
-          background: #ffffff;
-        `
-      })
-
-      // Set basic styles on clone
+        
+        // Apply to children
+        Array.from(el.children).forEach(child => applyPrintStyles(child))
+      }
+      
+      applyPrintStyles(clone)
+      
+      // Set container styles
       clone.style.cssText = `
         position: fixed;
-        left: 0;
+        left: -9999px;
         top: 0;
         width: 210mm;
-        background: #ffffff;
-        padding: 10mm;
-        font-family: Arial, sans-serif;
+        background: #fff;
+        padding: 15mm;
+        font-family: Arial, Helvetica, sans-serif;
+        color: #333;
       `
       
-      const inner = clone.querySelector('[class*="min-h-screen"]') as HTMLElement
-      if (inner) {
-        inner.style.cssText = `
-          min-height: auto;
-          padding: 10mm;
-          background: #ffffff;
-          color: #333333;
-        `
-      }
-
-      // Add to body
+      // Add to DOM
       document.body.appendChild(clone)
-
-      // Wait
+      
+      // Wait for render
       await new Promise(resolve => setTimeout(resolve, 300))
-
-      // Use html2pdf with simpler options
+      
+      // Use html2pdf.js
       const html2pdf = (await import('html2pdf.js')).default
-
+      
       await html2pdf()
         .set({
-          margin: 10,
+          margin: 0,
           filename: 'portfolio.pdf',
-          image: { type: 'jpeg', quality: 0.98 },
+          image: { type: 'jpeg', quality: 0.95 },
           html2canvas: { 
             scale: 2,
             useCORS: true,
             backgroundColor: '#ffffff',
-            logging: false
+            onclone: (clonedDoc: Document) => {
+              // Remove all style tags and external stylesheets from cloned doc
+              clonedDoc.querySelectorAll('style, link[rel="stylesheet"]').forEach(el => el.remove())
+              
+              // Also remove style attributes that might cause issues
+              clonedDoc.querySelectorAll('[style*="color("]').forEach(el => {
+                (el as HTMLElement).style.color = '#333333'
+              })
+              clonedDoc.querySelectorAll('[style*="background"]').forEach(el => {
+                const htmlEl = el as HTMLElement
+                const bg = htmlEl.style.background
+                if (bg && (bg.includes('var(') || bg.includes('color('))) {
+                  htmlEl.style.background = '#ffffff'
+                }
+              })
+            }
           },
           jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         })
@@ -100,7 +108,14 @@ export function usePdfExport(
       showSnackbar('PDF exported!')
     } catch (error) {
       console.error('PDF Error:', error)
-      showSnackbar('Export failed: ' + (error as Error).message, 'error')
+      
+      // Fallback: use window.print()
+      showSnackbar('Trying browser print...', 'warning')
+      
+      // Open print dialog
+      window.print()
+      
+      showSnackbar('Use browser "Save as PDF" option', 'info')
     }
   }
 
