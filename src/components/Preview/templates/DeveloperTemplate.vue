@@ -51,6 +51,6 @@
   </div>
 </template>
 <script setup lang="ts">
-import { usePortfolioStore } from '../../stores/portfolio'
+import { usePortfolioStore } from '../../../stores/portfolio'
 const store = usePortfolioStore()
 </script>
