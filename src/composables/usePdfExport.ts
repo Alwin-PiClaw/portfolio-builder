@@ -18,7 +18,6 @@ export function usePdfExport(
         return
       }
 
-      // Find the template root
       let templateRoot: HTMLElement | null = null
       const directChildren = previewCard.children
       for (let i = 0; i < directChildren.length; i++) {
@@ -53,7 +52,6 @@ export function usePdfExport(
 
       const clone = templateRoot.cloneNode(true) as HTMLElement
       
-      // Clean styles for PDF
       clone.style.cssText = `
         position: fixed;
         left: -9999px;
@@ -101,50 +99,46 @@ export function usePdfExport(
       
       await new Promise(resolve => setTimeout(resolve, 500))
       
-      // Import jspdf directly to save with custom method
-      const { jsPDF } = await import('jspdf')
-      const html2canvasModule = await import('html2canvas')
-      const html2canvas = html2canvasModule.default
+      // Use html2pdf.js
+      const html2pdfModule = await import('html2pdf.js')
+      const html2pdf = html2pdfModule.default
       
-      // Create canvas from clone
-      const canvas = await html2canvas(clone, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#ffffff',
-        logging: false,
-        windowWidth: 794
-      })
-
-      // Create PDF
-      const imgData = canvas.toDataURL('image/jpeg', 0.95)
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      })
-
-      const imgWidth = 210
-      const imgHeight = (canvas.height * imgWidth) / canvas.width
-
-      pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight)
-      
-      // Save to server-accessible location
-      const pdfBlob = pdf.output('blob')
-      
-      // Create a download link - this will trigger browser download
-      const url = URL.createObjectURL(pdfBlob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = 'portfolio.pdf'
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      URL.revokeObjectURL(url)
+      // Generate PDF as blob
+      const pdfBlob = await html2pdf()
+        .set({
+          margin: 0,
+          filename: 'portfolio.pdf',
+          image: { type: 'jpeg', quality: 0.95 },
+          html2canvas: { 
+            scale: 2,
+            useCORS: true,
+            backgroundColor: '#ffffff',
+            logging: false,
+            windowWidth: 794
+          },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        })
+        .from(clone)
+        .outputPdf('blob')
 
       document.body.removeChild(clone)
       console.log('PDF Export: Complete!')
       
-      showSnackbar('PDF exported to Downloads folder!')
+      // Convert blob to base64 and show in snackbar with option to download
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        const base64data = reader.result as string
+        // Create download link
+        const link = document.createElement('a')
+        link.href = base64data
+        link.download = 'portfolio.pdf'
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+      }
+      reader.readAsDataURL(pdfBlob)
+      
+      showSnackbar('PDF exported! Check your downloads folder.')
       
     } catch (error) {
       console.error('PDF Export Error:', error)
