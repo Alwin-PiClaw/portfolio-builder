@@ -49,67 +49,46 @@
                   <v-card-title class="text-body-1 font-weight-bold pa-0">{{ $t('editor.basicInfo') }}</v-card-title>
                 </v-card-item>
                 <v-card-text class="pt-3">
-                  <div class="mb-3">
-                    <v-text-field 
-                      v-model="store.portfolio.name" 
-                      @update:model-value="handleSave" 
-                      :label="$t('editor.name')" 
-                      variant="outlined" 
-                      density="default"
-                      hide-details="auto"
-                      color="primary"
-                      prepend-inner-icon="mdi-account"
-                    ></v-text-field>
-                  </div>
-                  <div class="mb-3">
-                    <v-text-field 
-                      v-model="store.portfolio.title" 
-                      @update:model-value="handleSave" 
-                      :label="$t('editor.title')" 
-                      variant="outlined" 
-                      density="default"
-                      hide-details="auto"
-                      color="primary"
-                      prepend-inner-icon="mdi-briefcase"
-                    ></v-text-field>
-                  </div>
-                  <div class="mb-3">
-                    <v-textarea 
-                      v-model="store.portfolio.bio" 
-                      @update:model-value="handleSave" 
-                      :label="$t('editor.bio')" 
-                      variant="outlined" 
-                      density="default"
-                      rows="3" 
-                      hide-details="auto"
-                      color="primary"
-                      prepend-inner-icon="mdi-text"
-                    ></v-textarea>
-                  </div>
-                  <div class="mb-3">
-                    <v-text-field 
-                      v-model="store.portfolio.location" 
-                      @update:model-value="handleSave" 
-                      :label="$t('editor.location')" 
-                      variant="outlined" 
-                      density="default"
-                      hide-details="auto"
-                      color="primary"
-                      prepend-inner-icon="mdi-map-marker"
-                    ></v-text-field>
-                  </div>
-                  <div class="mb-1">
-                    <v-text-field 
-                      v-model="store.portfolio.email" 
-                      @update:model-value="handleSave" 
-                      :label="$t('editor.email')" 
-                      variant="outlined" 
-                      density="default"
-                      hide-details="auto"
-                      color="primary"
-                      prepend-inner-icon="mdi-email"
-                    ></v-text-field>
-                  </div>
+                  <v-text-field 
+                    v-model="store.portfolio.name" 
+                    @update:model-value="handleSave" 
+                    :label="$t('editor.name')" 
+                    variant="outlined"
+                    prepend-inner-icon="mdi-account"
+                    class="mb-2"
+                  ></v-text-field>
+                  <v-text-field 
+                    v-model="store.portfolio.title" 
+                    @update:model-value="handleSave" 
+                    :label="$t('editor.title')" 
+                    variant="outlined"
+                    prepend-inner-icon="mdi-briefcase"
+                    class="mb-2"
+                  ></v-text-field>
+                  <v-textarea 
+                    v-model="store.portfolio.bio" 
+                    @update:model-value="handleSave" 
+                    :label="$t('editor.bio')" 
+                    variant="outlined"
+                    rows="3"
+                    prepend-inner-icon="mdi-text"
+                    class="mb-2"
+                  ></v-textarea>
+                  <v-text-field 
+                    v-model="store.portfolio.location" 
+                    @update:model-value="handleSave" 
+                    :label="$t('editor.location')" 
+                    variant="outlined"
+                    prepend-inner-icon="mdi-map-marker"
+                    class="mb-2"
+                  ></v-text-field>
+                  <v-text-field 
+                    v-model="store.portfolio.email" 
+                    @update:model-value="handleSave" 
+                    :label="$t('editor.email')" 
+                    variant="outlined"
+                    prepend-inner-icon="mdi-email"
+                  ></v-text-field>
                 </v-card-text>
               </v-card>
 
@@ -145,37 +124,29 @@
                           v-model="p.title" 
                           @update:model-value="() => saveProject(idx)" 
                           label="Project Title" 
-                          variant="outlined" 
-                          density="compact" 
-                          hide-details 
+                          variant="outlined"
                           class="mb-2"
                         ></v-text-field>
                         <v-textarea 
                           v-model="p.description" 
                           @update:model-value="() => saveProject(idx)" 
                           label="Description" 
-                          variant="outlined" 
-                          density="compact" 
-                          rows="2" 
-                          hide-details 
+                          variant="outlined"
+                          rows="2"
                           class="mb-2"
                         ></v-textarea>
                         <v-text-field 
                           v-model="p.link" 
                           @update:model-value="() => saveProject(idx)" 
                           label="Project URL" 
-                          variant="outlined" 
-                          density="compact" 
-                          hide-details 
+                          variant="outlined"
                           class="mb-2"
                         ></v-text-field>
                         <v-text-field 
                           v-model="p.tagsStr" 
                           @update:model-value="() => saveProject(idx)" 
                           label="Tags (comma separated)" 
-                          variant="outlined" 
-                          density="compact" 
-                          hide-details
+                          variant="outlined"
                         ></v-text-field>
                       </v-card-text>
                       <v-divider></v-divider>
