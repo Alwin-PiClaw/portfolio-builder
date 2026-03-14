@@ -51,7 +51,7 @@
                 <v-card-text class="pt-2">
                   <v-text-field 
                     v-model="store.portfolio.name" 
-                    @update:model-value="store.saveToLocalStorage()" 
+                    @update:model-value="handleSave" 
                     :label="$t('editor.name')" 
                     variant="outlined" 
                     density="comfortable" 
@@ -61,7 +61,7 @@
                   ></v-text-field>
                   <v-text-field 
                     v-model="store.portfolio.title" 
-                    @update:model-value="store.saveToLocalStorage()" 
+                    @update:model-value="handleSave" 
                     :label="$t('editor.title')" 
                     variant="outlined" 
                     density="comfortable" 
@@ -71,7 +71,7 @@
                   ></v-text-field>
                   <v-textarea 
                     v-model="store.portfolio.bio" 
-                    @update:model-value="store.saveToLocalStorage()" 
+                    @update:model-value="handleSave" 
                     :label="$t('editor.bio')" 
                     variant="outlined" 
                     density="comfortable" 
@@ -82,7 +82,7 @@
                   ></v-textarea>
                   <v-text-field 
                     v-model="store.portfolio.location" 
-                    @update:model-value="store.saveToLocalStorage()" 
+                    @update:model-value="handleSave" 
                     :label="$t('editor.location')" 
                     variant="outlined" 
                     density="comfortable" 
@@ -92,7 +92,7 @@
                   ></v-text-field>
                   <v-text-field 
                     v-model="store.portfolio.email" 
-                    @update:model-value="store.saveToLocalStorage()" 
+                    @update:model-value="handleSave" 
                     :label="$t('editor.email')" 
                     variant="outlined" 
                     density="comfortable" 
@@ -125,44 +125,44 @@
                       v-for="(p, idx) in store.portfolio.projects" 
                       :key="p.id" 
                       variant="outlined" 
-                      class="mb-2" 
+                      class="mb-3" 
                       rounded="lg"
                       elevation="0"
                     >
                       <v-card-text class="pb-2">
                         <v-text-field 
                           v-model="p.title" 
-                          @update:model-value="saveProject(idx)" 
+                          @update:model-value="() => saveProject(idx)" 
                           label="Project Title" 
-                          variant="plain" 
+                          variant="outlined" 
                           density="compact" 
                           hide-details 
-                          class="mb-1"
+                          class="mb-2"
                         ></v-text-field>
                         <v-textarea 
                           v-model="p.description" 
-                          @update:model-value="saveProject(idx)" 
+                          @update:model-value="() => saveProject(idx)" 
                           label="Description" 
-                          variant="plain" 
+                          variant="outlined" 
                           density="compact" 
                           rows="2" 
                           hide-details 
-                          class="mb-1"
+                          class="mb-2"
                         ></v-textarea>
                         <v-text-field 
                           v-model="p.link" 
-                          @update:model-value="saveProject(idx)" 
+                          @update:model-value="() => saveProject(idx)" 
                           label="Project URL" 
-                          variant="plain" 
+                          variant="outlined" 
                           density="compact" 
                           hide-details 
-                          class="mb-1"
+                          class="mb-2"
                         ></v-text-field>
                         <v-text-field 
                           v-model="p.tagsStr" 
-                          @update:model-value="saveProject(idx)" 
+                          @update:model-value="() => saveProject(idx)" 
                           label="Tags (comma separated)" 
-                          variant="plain" 
+                          variant="outlined" 
                           density="compact" 
                           hide-details
                         ></v-text-field>
@@ -312,10 +312,20 @@ const currentTemplate = computed(() => {
 
 onMounted(() => { 
   store.loadFromLocalStorage() 
-  store.portfolio.projects.forEach(p => {
-    (p as any).tagsStr = p.tags.join(', ')
-  })
+  initProjects()
 })
+
+const initProjects = () => {
+  store.portfolio.projects.forEach(p => {
+    if (!(p as any).tagsStr) {
+      (p as any).tagsStr = p.tags.join(', ')
+    }
+  })
+}
+
+const handleSave = () => {
+  store.saveToLocalStorage()
+}
 
 const selectTemplate = (id: string) => {
   store.setTemplate(id)
