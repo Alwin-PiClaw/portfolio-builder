@@ -6,58 +6,64 @@ export function usePdfExport(
 ) {
   const exportPdf = async () => {
     try {
-      // Find the preview card
-      const previewCard = document.querySelector('.preview-card') as HTMLElement
-      if (!previewCard) {
+      showSnackbar('Preparing PDF...', 'info')
+
+      // Use browser's PDF export via CDP
+      // We'll trigger print and user can save as PDF
+      // But first, let's prepare the page properly
+      
+      // Find the preview content (inside the preview card, the actual template content)
+      const previewContent = document.querySelector('.preview-card > div') as HTMLElement
+      
+      if (!previewContent) {
         showSnackbar('No preview found', 'error')
         return
       }
 
-      showSnackbar('Opening print dialog...', 'info')
-
-      // Clone the preview content
-      const clone = previewCard.cloneNode(true) as HTMLElement
+      // Create a clean print version
+      const printContent = previewContent.cloneNode(true) as HTMLElement
       
-      // Apply print-specific styles
-      clone.style.position = 'fixed'
-      clone.style.left = '-9999px'
-      clone.style.top = '0'
-      clone.style.width = '210mm'
-      clone.style.background = '#fff'
-      clone.style.padding = '20mm'
+      // Apply clean styles
+      printContent.style.cssText = `
+        position: fixed;
+        left: -9999px;
+        top: 0;
+        width: 210mm;
+        min-height: 297mm;
+        padding: 15mm;
+        background: white;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        color: #333;
+        line-height: 1.6;
+      `
       
-      // Make inner content full width
-      const inner = clone.querySelector('[class*="min-h-screen"]') as HTMLElement
-      if (inner) {
-        inner.style.minHeight = 'auto'
-        inner.style.padding = '0'
-        inner.style.borderRadius = '0'
-      }
+      // Remove any overflow or hidden styles
+      printContent.querySelectorAll('*').forEach((el) => {
+        const htmlEl = el as HTMLElement
+        const style = htmlEl.style
+        if (style.overflow === 'hidden' || style.overflow === 'auto') {
+          style.overflow = 'visible'
+        }
+        if (style.display === 'none') {
+          style.display = ''
+        }
+      })
 
-      // Remove card styling
-      const vCard = clone.querySelector('.v-card') as HTMLElement
-      if (vCard) {
-        vCard.style.borderRadius = '0'
-        vCard.style.boxShadow = 'none'
-      }
-
-      // Add to page
-      document.body.appendChild(clone)
-
-      // Wait a moment for rendering
-      await new Promise(resolve => setTimeout(resolve, 200))
-
-      // Trigger print dialog
+      document.body.appendChild(printContent)
+      
+      await new Promise(resolve => setTimeout(resolve, 300))
+      
+      // Use window.print() - this will show the print dialog
       window.print()
-
-      // Cleanup after print dialog closes (or immediately)
+      
+      // Cleanup
       setTimeout(() => {
         try {
-          document.body.removeChild(clone)
+          document.body.removeChild(printContent)
         } catch (e) {}
       }, 1000)
       
-      showSnackbar('Use "Save as PDF" in print dialog!')
+      showSnackbar('Save as PDF from print dialog!')
     } catch (error) {
       console.error('Print Error:', error)
       showSnackbar('Print failed: ' + (error as Error).message, 'error')
