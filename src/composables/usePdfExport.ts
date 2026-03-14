@@ -18,7 +18,7 @@ export function usePdfExport(
         return
       }
 
-      // Find the template content (the div with min-h-screen class)
+      // Get the template content - the actual portfolio
       const templateContent = previewCard.querySelector('[class*="min-h-screen"]') as HTMLElement
       
       if (!templateContent) {
@@ -26,53 +26,41 @@ export function usePdfExport(
         return
       }
       
-      console.log('PDF Export: templateContent found:', !!templateContent)
+      console.log('PDF Export: templateContent found')
 
-      // Clone and apply minimal styles
+      // Clone the element
       const clone = templateContent.cloneNode(true) as HTMLElement
       
-      // Clean, minimal styles for PDF
-      clone.style.cssText = `
-        position: fixed;
-        left: -9999px;
-        top: 0;
-        width: 210mm;
-        min-height: auto;
-        padding: 20mm;
-        background: #ffffff;
-        box-sizing: border-box;
-      `
+      // Just set position, let original CSS work
+      clone.style.position = 'fixed'
+      clone.style.left = '-9999px'
+      clone.style.top = '0'
       
-      // Remove ALL classes
-      const stripClasses = (el: Element) => {
-        (el as HTMLElement).removeAttribute('class')
-        Array.from(el.children).forEach(child => stripClasses(child))
-      }
-      stripClasses(clone)
+      // Only remove classes from root, keep children classes
+      clone.removeAttribute('class')
       
       document.body.appendChild(clone)
       console.log('PDF Export: Clone added')
       
       await new Promise(resolve => setTimeout(resolve, 500))
       
-      // Generate PDF
+      // Use html2pdf
       const html2pdfModule = await import('html2pdf.js')
       const html2pdf = html2pdfModule.default
       
       await html2pdf()
         .set({
-          margin: 0,
+          margin: 10,
           filename: 'portfolio.pdf',
           image: { type: 'jpeg', quality: 0.98 },
           html2canvas: { 
-            scale: 2,
+            scale: 1,  // Use scale 1 for better accuracy
             useCORS: true,
             backgroundColor: '#ffffff',
             logging: false,
             windowWidth: 794
           },
-          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-          pagebreak: { mode: 'avoid-all' }
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         })
         .from(clone)
         .save()
