@@ -21,12 +21,12 @@
         {{ $t('app.templates') }}
       </v-btn>
       
-      <v-btn variant="tonal" class="mr-2" @click="exportJSON">
+      <v-btn variant="tonal" class="mr-2" @click="handleExportJSON">
         <v-icon icon="mdi-export" class="mr-1"></v-icon>
         {{ $t('app.export') }}
       </v-btn>
       
-      <v-btn variant="flat" color="primary" @click="exportPDF">
+      <v-btn variant="flat" color="primary" @click="handleExportPDF">
         <v-icon icon="mdi-file-pdf-box" class="mr-1"></v-icon>
         {{ $t('app.pdf') }}
       </v-btn>
@@ -274,11 +274,16 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <!-- Snackbar for notifications -->
+    <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
+      {{ snackbar.text }}
+    </v-snackbar>
   </v-app>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, reactive } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePortfolioStore } from './stores/portfolio'
 import MinimalTemplate from './components/Preview/templates/MinimalTemplate.vue'
@@ -290,6 +295,12 @@ import DesignerTemplate from './components/Preview/templates/DesignerTemplate.vu
 const { locale, t } = useI18n()
 const store = usePortfolioStore()
 const showTemplates = ref(false)
+
+const snackbar = reactive({
+  show: false,
+  text: '',
+  color: 'success'
+})
 
 const templates = [
   { id: 'minimal', previewClass: 'bg-gradient-to-br from-gray-700 to-gray-900', icon: 'mdi-text-box-outline' },
@@ -330,6 +341,7 @@ const handleSave = () => {
 const selectTemplate = (id: string) => {
   store.setTemplate(id)
   showTemplates.value = false
+  showSnackbar('Template changed!')
 }
 
 const saveProject = (idx: number) => {
@@ -342,14 +354,24 @@ const saveProject = (idx: number) => {
 
 const addProject = () => {
   store.addProject({ id: Date.now().toString(), title: '', description: '', tags: [], link: '', tagsStr: '' })
+  showSnackbar('Project added!')
 }
 
 const addSkill = () => {
   const n = prompt('Skill name:')
-  if (n) store.addSkill({ name: n, level: 80, category: 'frontend' })
+  if (n) {
+    store.addSkill({ name: n, level: 80, category: 'frontend' })
+    showSnackbar('Skill added!')
+  }
 }
 
-const exportJSON = () => {
+const showSnackbar = (text: string, color: string = 'success') => {
+  snackbar.text = text
+  snackbar.color = color
+  snackbar.show = true
+}
+
+const handleExportJSON = () => {
   const data = { ...store.portfolio }
   delete (data as any).projects
   const projects = store.portfolio.projects.map(p => {
@@ -359,13 +381,39 @@ const exportJSON = () => {
   const exportData = { ...data, projects }
   const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'portfolio.json'; a.click()
+  showSnackbar('JSON exported!')
 }
 
-const exportPDF = async () => {
-  const html2pdf = (await import('html2pdf.js')).default
-  const el = document.querySelector('.preview-card .preview-content') as HTMLElement
-  if (el) {
-    html2pdf().set({ margin: 0, filename: 'portfolio.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4' } }).from(el).save()
+const handleExportPDF = async () => {
+  try {
+    // Get the preview card content
+    const previewCard = document.querySelector('.preview-card') as HTMLElement
+    if (!previewCard) {
+      showSnackbar('No preview content found', 'error')
+      return
+    }
+    
+    // Clone the content to avoid modifying the original
+    const content = previewCard.cloneNode(true) as HTMLElement
+    content.style.width = 'A4'
+    content.style.maxWidth = '210mm'
+    content.style.margin = '0'
+    content.style.padding = '20mm'
+    
+    const html2pdf = (await import('html2pdf.js')).default
+    const opt = {
+      margin: 10,
+      filename: 'portfolio.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    }
+    
+    await html2pdf().set(opt).from(content).save()
+    showSnackbar('PDF exported!')
+  } catch (error) {
+    console.error('PDF export error:', error)
+    showSnackbar('PDF export failed: ' + (error as Error).message, 'error')
   }
 }
 </script>
