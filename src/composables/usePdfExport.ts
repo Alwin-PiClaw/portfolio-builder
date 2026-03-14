@@ -8,7 +8,7 @@ export function usePdfExport(
     console.log('PDF Export: Starting...')
     
     try {
-      // Find the preview content - the actual template inside preview-card
+      // Find the preview card
       const previewCard = document.querySelector('.preview-card')
       console.log('PDF Export: previewCard found:', !!previewCard)
       
@@ -17,9 +17,9 @@ export function usePdfExport(
         return
       }
 
-      // Get the template content (first child of preview-card)
-      const templateContent = previewCard.querySelector('[class*="min-h-screen"]') as HTMLElement
-      console.log('PDF Export: templateContent found:', !!templateContent)
+      // Get the first child (the template component)
+      const templateContent = previewCard.children[0] as HTMLElement
+      console.log('PDF Export: templateContent found:', !!templateContent, 'tag:', templateContent?.tagName)
       
       if (!templateContent) {
         showSnackbar('No template content found', 'error')
@@ -29,10 +29,10 @@ export function usePdfExport(
       showSnackbar('Generating PDF...', 'info')
       console.log('PDF Export: Creating clone...')
 
-      // Create a clean clone for PDF generation
+      // Clone the template content
       const clone = templateContent.cloneNode(true) as HTMLElement
       
-      // Set basic styles
+      // Set clean styles for A4
       clone.style.cssText = `
         position: fixed;
         left: -9999px;
@@ -45,7 +45,7 @@ export function usePdfExport(
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       `
       
-      // Remove all class attributes
+      // Remove class attributes from all elements
       const removeClasses = (el: Element) => {
         (el as HTMLElement).removeAttribute('class')
         Array.from(el.children).forEach(child => removeClasses(child))
