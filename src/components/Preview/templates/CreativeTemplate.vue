@@ -1,5 +1,5 @@
 <template>
-  <div class="preview-content min-h-screen bg-gradient-to-br from-purple-600 to-pink-500 text-white">
+  <div class="preview-content text-white" style="min-height: 100vh; background: linear-gradient(to bottom right, #9333ea, #ec4899);">
     <!-- Hero -->
     <v-container fluid class="py-16 text-center">
       <v-avatar size="140" color="white" class="mb-4" style="opacity: 0.2;">
@@ -16,7 +16,7 @@
         <h2 class="text-h3 font-weight-bold mb-8 text-center">Featured Projects</h2>
         <v-row>
           <v-col v-for="p in store.portfolio.projects" :key="p.id" cols="12" md="4">
-            <v-card rounded="xl" class="h-100" elevation="4">
+            <v-card rounded="xl" elevation="4" style="height: 100%">
               <div class="pa-8 text-center" style="background: linear-gradient(135deg, #f8bbd9, #e1bee7);">
                 <v-icon size="48" color="purple-darken-2">mdi-web</v-icon>
               </div>
@@ -34,7 +34,7 @@
     <!-- Skills -->
     <v-container v-if="store.portfolio.skills.length" fluid class="py-12 text-center" style="background: rgba(255,255,255,0.1);">
       <h2 class="text-h3 font-weight-bold mb-8">Skills</h2>
-      <div class="d-flex flex-wrap justify-center ga-3">
+      <div class="d-flex flex-wrap justify-center" style="gap: 12px;">
         <v-chip v-for="s in store.portfolio.skills" :key="s.name" size="x-large" class="ma-1" color="white" text-color="purple-darken-2">
           {{ s.name }}
         </v-chip>

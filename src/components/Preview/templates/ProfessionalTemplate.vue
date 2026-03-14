@@ -1,5 +1,5 @@
 <template>
-  <div class="preview-content min-h-screen bg-white">
+  <div class="preview-content bg-white" style="min-height: 100vh;">
     <!-- Header -->
     <v-app-bar color="blue-grey-darken-4" flat>
       <v-container class="d-flex align-center">

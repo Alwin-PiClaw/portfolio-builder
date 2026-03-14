@@ -1,5 +1,5 @@
 <template>
-  <div class="preview-content min-h-screen bg-grey-9" style="color: #4ade80; font-family: 'Courier New', monospace;">
+  <div class="preview-content bg-grey-9" style="min-height: 100vh; color: #4ade80; font-family: 'Courier New', monospace;">
     <v-container class="py-16">
       <p class="text-h6 mb-4" style="color: #22c55e;">// Hello, World!</p>
       <p class="mb-4"><span style="color: #22c55e;">const</span> developer = {</p>

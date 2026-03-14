@@ -1,5 +1,5 @@
 <template>
-  <div id="preview-content" class="preview-content min-h-screen bg-white">
+  <div id="preview-content" class="preview-content bg-white" style="min-height: 100vh;">
     <!-- Hero Section -->
     <v-container fluid class="py-16 text-center bg-grey-lighten-5">
       <v-avatar size="120" color="grey-lighten-2" class="mb-4">
@@ -8,7 +8,7 @@
       <h1 class="text-h3 font-weight-bold mb-2">{{ store.portfolio.name || 'Your Name' }}</h1>
       <p class="text-h6 text-grey-darken-1 mb-4">{{ store.portfolio.title || 'Your Title' }}</p>
       <p class="text-body-1 text-grey-darken-1 mb-4 mx-auto" style="max-width: 600px;">{{ store.portfolio.bio || 'Your bio...' }}</p>
-      <div class="d-flex justify-center gap-2 text-body-2 text-grey">
+      <div class="d-flex justify-center text-body-2 text-grey" style="gap: 8px;">
         <span v-if="store.portfolio.location">
           <v-icon size="small" class="mr-1">mdi-map-marker</v-icon>{{ store.portfolio.location }}
         </span>
@@ -26,7 +26,7 @@
         </h2>
         <v-row>
           <v-col v-for="p in store.portfolio.projects" :key="p.id" cols="12" md="6">
-            <v-card rounded="lg" elevation="2" class="h-100">
+            <v-card rounded="lg" elevation="2" style="height: 100%">
               <v-card-item>
                 <v-card-title class="font-weight-bold">{{ p.title || 'Project' }}</v-card-title>
               </v-card-item>

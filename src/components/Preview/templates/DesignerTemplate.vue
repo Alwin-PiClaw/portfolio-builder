@@ -1,5 +1,5 @@
 <template>
-  <div class="preview-content min-h-screen bg-gradient-to-br from-rose-400 via-orange-300 to-amber-200">
+  <div class="preview-content" style="min-height: 100vh; background: linear-gradient(to bottom right, #fb7185, #fdba74, #fcd34d);">
     <!-- Hero -->
     <v-container fluid class="py-16 text-center">
       <v-card rounded="xl" elevation="8" class="d-inline-block pa-2 mx-auto" style="transform: rotate(-3deg);">
@@ -18,7 +18,7 @@
         <h2 class="text-h3 font-weight-bold mb-8 text-center" style="color: #1f2937;">Selected Works</h2>
         <v-row>
           <v-col v-for="(p, i) in store.portfolio.projects" :key="p.id" cols="12" md="6">
-            <v-card rounded="2xl" elevation="6" class="h-100" :style="{ transform: i % 2 === 0 ? 'rotate(1deg)' : 'rotate(-1deg)' }">
+            <v-card rounded="2xl" elevation="6" :style="{ height: '100%', transform: i % 2 === 0 ? 'rotate(1deg)' : 'rotate(-1deg)' }">
               <div class="pa-8 text-center" style="background: linear-gradient(135deg, #fce7f3, #fed7aa);">
                 <v-icon size="56" color="rose-darken-2">mdi-palette</v-icon>
               </div>
@@ -36,7 +36,7 @@
     <!-- Skills -->
     <v-container v-if="store.portfolio.skills.length" fluid class="py-12 text-center" style="background: rgba(255,255,255,0.5);">
       <h2 class="text-h3 font-weight-bold mb-8" style="color: #1f2937;">Skills & Tools</h2>
-      <div class="d-flex flex-wrap justify-center ga-3">
+      <div class="d-flex flex-wrap justify-center" style="gap: 12px;">
         <v-chip v-for="s in store.portfolio.skills" :key="s.name" size="x-large" class="ma-1" color="white" style="color: #1f2937; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
           {{ s.name }}
         </v-chip>

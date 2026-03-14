@@ -1,38 +1,134 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-:root { 
-  --primary: #0ea5e9; 
+:root {
+  --app-bg: #f8fafc;
+  --app-surface: #ffffff;
+  --app-surface-elevated: #ffffff;
+  --app-border: #e2e8f0;
+  --app-radius: 16px;
+  --app-radius-sm: 12px;
+  --app-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06);
+  --app-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+  --app-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.08);
+  --app-primary: #6366f1;
+  --app-primary-hover: #4f46e5;
 }
 
-* { 
-  box-sizing: border-box; 
+* {
+  box-sizing: border-box;
 }
 
 html, body {
-  font-family: 'Inter', 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+  font-family: 'DM Sans', 'Noto Sans SC', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   scroll-behavior: smooth;
+  background: var(--app-bg);
+}
+
+/* App layout */
+.portfolio-app {
+  background: var(--app-bg) !important;
+}
+
+.portfolio-app .v-main {
+  background: var(--app-bg) !important;
+}
+
+/* App bar – modern flat with subtle border */
+.portfolio-app .v-app-bar {
+  background: var(--app-surface) !important;
+  box-shadow: var(--app-shadow) !important;
+  border-bottom: 1px solid var(--app-border) !important;
+}
+
+/* Editor sidebar – soft elevated surface */
+.editor-sidebar {
+  background: var(--app-bg);
+  border-right: 1px solid var(--app-border);
+}
+
+.editor-sidebar .v-card {
+  background: var(--app-surface) !important;
+  border: 1px solid var(--app-border) !important;
+  border-radius: var(--app-radius) !important;
+  box-shadow: var(--app-shadow) !important;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.editor-sidebar .v-card:hover {
+  box-shadow: var(--app-shadow-md) !important;
+}
+
+/* Preview area */
+.preview-card {
+  border-radius: var(--app-radius) !important;
+  box-shadow: var(--app-shadow-lg) !important;
+  border: 1px solid var(--app-border) !important;
+  overflow: hidden;
+}
+
+/* Template picker cards */
+.template-card {
+  transition: all 0.2s ease !important;
+}
+
+.template-card:hover {
+  border-color: var(--app-primary) !important;
+  box-shadow: 0 0 0 2px rgb(99 102 241 / 0.2) !important;
+}
+
+.template-card.selected {
+  border-color: var(--app-primary) !important;
+  box-shadow: 0 0 0 2px var(--app-primary) !important;
+  background: rgb(99 102 241 / 0.04) !important;
+}
+
+/* Buttons */
+.v-btn {
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  font-weight: 500 !important;
+}
+
+/* Inputs – consistent radius */
+.v-field {
+  border-radius: var(--app-radius-sm) !important;
+}
+
+.v-field--variant-outlined {
+  border-radius: var(--app-radius-sm) !important;
+}
+
+/* Chips */
+.v-chip {
+  font-weight: 500 !important;
+}
+
+/* Dialog */
+.v-dialog > .v-overlay__content {
+  border-radius: 24px !important;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.2) !important;
+  overflow: hidden;
 }
 
 /* Custom scrollbar */
-::-webkit-scrollbar { 
-  width: 8px; 
-  height: 8px; 
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
-::-webkit-scrollbar-track { 
-  background: transparent; 
+
+::-webkit-scrollbar-track {
+  background: transparent;
 }
-::-webkit-scrollbar-thumb { 
-  background: rgba(0,0,0,0.15); 
-  border-radius: 4px; 
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
 }
-::-webkit-scrollbar-thumb:hover { 
-  background: rgba(0,0,0,0.25); 
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 /* Transitions */
@@ -40,37 +136,8 @@ html, body {
 .fade-leave-active {
   transition: opacity 0.2s ease;
 }
+
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
-}
-
-/* Vuetify overrides for smoother look */
-.v-card {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-}
-
-.v-btn {
-  text-transform: none !important;
-  letter-spacing: 0 !important;
-  font-weight: 500 !important;
-}
-
-/* Input styling */
-.v-field {
-  border-radius: 12px !important;
-}
-
-.v-field--variant-outlined {
-  border-radius: 12px !important;
-}
-
-/* Chip styling */
-.v-chip {
-  font-weight: 500 !important;
-}
-
-/* Dialog styling */
-.v-dialog > .v-overlay__content {
-  border-radius: 24px !important;
 }
