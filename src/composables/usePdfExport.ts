@@ -1,27 +1,4 @@
-import type { usePortfolioStore } from '../stores/portfolio'
-
-function applyComputedStylesToClone(original: HTMLElement, clone: HTMLElement) {
-  if (original.nodeType !== 1 || clone.nodeType !== 1) return
-  const computed = window.getComputedStyle(original)
-  const style = (clone as HTMLElement).style
-  const props = [
-    'color', 'backgroundColor', 'borderColor', 'borderTopColor', 'borderRightColor', 'borderBottomColor', 'borderLeftColor',
-    'outlineColor', 'fill', 'stroke', 'width', 'height', 'minHeight', 'maxWidth', 'padding', 'paddingTop', 'paddingRight',
-    'paddingBottom', 'paddingLeft', 'margin', 'marginTop', 'marginRight', 'marginBottom', 'marginLeft', 'boxSizing',
-    'fontSize', 'fontWeight', 'fontFamily', 'lineHeight', 'textAlign', 'borderWidth', 'borderStyle', 'borderRadius',
-    'boxShadow', 'display', 'flexDirection', 'alignItems', 'justifyContent', 'gap', 'flexWrap'
-  ]
-  props.forEach(prop => {
-    const k = prop.replace(/([A-Z])/g, '-$1').toLowerCase().replace(/^-/, '')
-    const value = computed.getPropertyValue(k)
-    if (value) (style as any)[prop] = value
-  })
-  const origChildren = Array.from(original.children) as HTMLElement[]
-  const cloneChildren = Array.from(clone.children) as HTMLElement[]
-  origChildren.forEach((origChild, i) => {
-    if (cloneChildren[i]) applyComputedStylesToClone(origChild, cloneChildren[i])
-  })
-}
+import { usePortfolioStore } from '../stores/portfolio'
 
 export function usePdfExport(
   store: ReturnType<typeof usePortfolioStore>,
@@ -29,37 +6,67 @@ export function usePdfExport(
 ) {
   const exportPdf = async () => {
     try {
+      // Find the preview card element
       const previewCard = document.querySelector('.preview-card') as HTMLElement
       if (!previewCard) {
         showSnackbar('No preview content found', 'error')
         return
       }
 
-      const content = previewCard.cloneNode(true) as HTMLElement
-      applyComputedStylesToClone(previewCard, content)
-      content.style.width = '210mm'
-      content.style.maxWidth = '210mm'
-      content.style.margin = '0'
-      content.style.padding = '20mm'
+      // Create a clone for export without overflow issues
+      const clone = previewCard.cloneNode(true) as HTMLElement
+      clone.style.position = 'absolute'
+      clone.style.left = '-9999px'
+      clone.style.top = '0'
+      clone.style.width = '794px' // A4 width in pixels at 96dpi
+      clone.style.maxWidth = 'none'
+      clone.style.overflow = 'visible'
+      
+      // Remove rounded corners and shadows for PDF
+      const cloneCard = clone.querySelector('.preview-content, [class*="min-h-screen"]') as HTMLElement
+      if (cloneCard) {
+        cloneCard.style.borderRadius = '0'
+      }
+      
+      // Remove any overflow hidden
+      clone.style.overflow = 'visible'
+      
+      document.body.appendChild(clone)
 
-      const html2pdf = (await import('html2pdf.js')).default
+      // Wait for images to load
+      await new Promise(resolve => setTimeout(resolve, 500))
+
+      // Import html2pdf dynamically
+      const html2pdfModule = await import('html2pdf.js')
+      const html2pdf = html2pdfModule.default
+
       const opt = {
-        margin: 10,
+        margin: [5, 5, 5, 5], // Top, left, bottom, right in mm
         filename: 'portfolio.pdf',
-        image: { type: 'jpeg' as const, quality: 0.98 },
+        image: { type: 'jpeg', quality: 0.98 },
         html2canvas: {
           scale: 2,
           useCORS: true,
           letterRendering: true,
-          onclone: (_clonedDoc: Document) => {
-            const head = _clonedDoc.head
-            if (head) head.querySelectorAll('link[rel="stylesheet"], style').forEach(el => el.remove())
-          }
+          allowTaint: true,
+          backgroundColor: '#ffffff',
+          windowWidth: 794,
+          scrollY: 0,
+          logging: false
         },
-        jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
+        jsPDF: { 
+          unit: 'mm', 
+          format: 'a4', 
+          orientation: 'portrait' 
+        },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
       }
 
-      await html2pdf().set(opt).from(content).save()
+      await html2pdf().set(opt).from(clone).save()
+
+      // Clean up
+      document.body.removeChild(clone)
+      
       showSnackbar('PDF exported!')
     } catch (error) {
       console.error('PDF export error:', error)
