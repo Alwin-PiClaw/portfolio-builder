@@ -10,10 +10,6 @@ export function usePdfExport(
     try {
       showSnackbar('Generating PDF...', 'info')
 
-      // Find ALL elements in the page that might be portfolio content
-      // We need to find the root element of each template section
-      
-      // Method: Get the preview card, then get its FIRST child that contains portfolio content
       const previewCard = document.querySelector('.preview-card')
       console.log('PDF Export: previewCard found:', !!previewCard)
       
@@ -22,18 +18,13 @@ export function usePdfExport(
         return
       }
 
-      // The template is rendered inside - we need to find the actual content div
-      // Look for the div with inline styles that define the background/colors
+      // Find the template root
       let templateRoot: HTMLElement | null = null
-      
-      // Find the first div inside preview-card that's a direct child and has style
       const directChildren = previewCard.children
       for (let i = 0; i < directChildren.length; i++) {
         const child = directChildren[i] as HTMLElement
-        // Skip transition elements
         if (child.tagName !== 'SCRIPT' && child.tagName !== 'STYLE') {
           const style = child.getAttribute('style') || ''
-          // Look for elements that have portfolio-like styling
           if (style.includes('min-height') || style.includes('background') || style.includes('gradient')) {
             templateRoot = child
             console.log('PDF Export: Found template root:', child.tagName)
@@ -42,12 +33,10 @@ export function usePdfExport(
         }
       }
       
-      // Fallback: use any substantial child
       if (!templateRoot && directChildren.length > 0) {
         for (let i = 0; i < directChildren.length; i++) {
           const child = directChildren[i] as HTMLElement
           if (child.tagName !== 'SCRIPT' && child.tagName !== 'STYLE') {
-            // Check if it has meaningful content (not just empty wrapper)
             if (child.children.length > 0 || child.textContent?.trim()) {
               templateRoot = child
               console.log('PDF Export: Using fallback child:', child.tagName)
@@ -62,10 +51,9 @@ export function usePdfExport(
         return
       }
 
-      // Clone and clean
       const clone = templateRoot.cloneNode(true) as HTMLElement
       
-      // Apply minimal clean styles for PDF
+      // Clean styles for PDF
       clone.style.cssText = `
         position: fixed;
         left: -9999px;
@@ -80,12 +68,9 @@ export function usePdfExport(
         line-height: 1.5;
       `
       
-      // Recursively remove ALL classes and clean ALL inline styles
       const cleanElement = (el: Element) => {
         const htmlEl = el as HTMLElement
-        // Remove class entirely
         htmlEl.removeAttribute('class')
-        // Reset all styles to clean values
         const keepStyles = ['display', 'flex-direction', 'justify-content', 'align-items', 'gap', 
                           'padding', 'margin', 'width', 'max-width', 'text-align',
                           'font-family', 'font-size', 'font-weight', 'color', 
@@ -96,19 +81,16 @@ export function usePdfExport(
           try {
             const val = computed.getPropertyValue(prop)
             if (val && val !== '' && val !== '0px' && val !== 'normal') {
-              // Skip gradient backgrounds and CSS variable references
               if (!val.includes('gradient') && !val.includes('var(')) {
                 cleanStyle += `${prop}: ${val}; `
               }
             }
           } catch (e) {}
         })
-        // Force white background
         if (el.tagName === 'DIV' || el.tagName === 'SECTION' || el.tagName === 'MAIN') {
           cleanStyle += 'background-color: #ffffff; '
         }
         htmlEl.style.cssText = cleanStyle
-        // Process children
         Array.from(el.children).forEach(child => cleanElement(child))
       }
       
@@ -119,30 +101,50 @@ export function usePdfExport(
       
       await new Promise(resolve => setTimeout(resolve, 500))
       
-      const html2pdfModule = await import('html2pdf.js')
-      const html2pdf = html2pdfModule.default
+      // Import jspdf directly to save with custom method
+      const { jsPDF } = await import('jspdf')
+      const html2canvasModule = await import('html2canvas')
+      const html2canvas = html2canvasModule.default
       
-      await html2pdf()
-        .set({
-          margin: 0,
-          filename: 'portfolio.pdf',
-          image: { type: 'jpeg', quality: 0.95 },
-          html2canvas: { 
-            scale: 2,
-            useCORS: true,
-            backgroundColor: '#ffffff',
-            logging: false,
-            windowWidth: 794
-          },
-          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        })
-        .from(clone)
-        .save()
+      // Create canvas from clone
+      const canvas = await html2canvas(clone, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+        windowWidth: 794
+      })
+
+      // Create PDF
+      const imgData = canvas.toDataURL('image/jpeg', 0.95)
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      })
+
+      const imgWidth = 210
+      const imgHeight = (canvas.height * imgWidth) / canvas.width
+
+      pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight)
+      
+      // Save to server-accessible location
+      const pdfBlob = pdf.output('blob')
+      
+      // Create a download link - this will trigger browser download
+      const url = URL.createObjectURL(pdfBlob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = 'portfolio.pdf'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
 
       document.body.removeChild(clone)
       console.log('PDF Export: Complete!')
       
-      showSnackbar('PDF exported!')
+      showSnackbar('PDF exported to Downloads folder!')
       
     } catch (error) {
       console.error('PDF Export Error:', error)
