@@ -14,52 +14,80 @@ export function usePdfExport(
 
       showSnackbar('Preparing PDF...', 'info')
 
-      // Create a clone for printing
+      // Clone the element
       const clone = previewElement.cloneNode(true) as HTMLElement
       
-      // Style the clone for print
-      clone.style.position = 'fixed'
-      clone.style.left = '0'
-      clone.style.top = '0'
-      clone.style.width = '100%'
-      clone.style.zIndex = '99999'
-      clone.style.background = '#fff'
-      clone.style.padding = '10mm'
-      clone.style.margin = '0'
+      // Remove all style attributes and classes that might cause issues
+      clone.querySelectorAll('*').forEach((el: Element) => {
+        const htmlEl = el as HTMLElement
+        
+        // Get computed styles and apply as inline styles
+        const originalEl = previewElement.querySelector(`[data-id="${htmlEl.getAttribute('data-id')}"]`) || 
+                          Array.from(previewElement.querySelectorAll('*')).find(e => e === el)
+        if (originalEl) {
+          const computed = window.getComputedStyle(originalEl as Element)
+          
+          // Apply solid colors instead of CSS variables
+          const props = ['color', 'backgroundColor', 'background', 'borderColor']
+          props.forEach(prop => {
+            const value = computed.getPropertyValue(prop)
+            if (value && !value.includes('var(') && !value.includes('rgb(a)?')) {
+              try {
+                htmlEl.style.setProperty(prop, value)
+              } catch (e) {}
+            }
+          })
+        }
+        
+        // Remove problematic CSS
+        htmlEl.removeAttribute('class')
+        htmlEl.style.cssText = `
+          font-family: Arial, sans-serif;
+          color: #333333;
+          background: #ffffff;
+        `
+      })
+
+      // Set basic styles on clone
+      clone.style.cssText = `
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 210mm;
+        background: #ffffff;
+        padding: 10mm;
+        font-family: Arial, sans-serif;
+      `
       
-      // Remove rounded corners from inner content
       const inner = clone.querySelector('[class*="min-h-screen"]') as HTMLElement
       if (inner) {
-        inner.style.borderRadius = '0'
-        inner.style.margin = '0'
-        inner.style.padding = '10mm'
+        inner.style.cssText = `
+          min-height: auto;
+          padding: 10mm;
+          background: #ffffff;
+          color: #333333;
+        `
       }
 
-      // Remove v-card overflow styling
-      const card = clone.querySelector('.v-card') as HTMLElement
-      if (card) {
-        card.style.overflow = 'visible'
-        card.style.borderRadius = '0'
-      }
-
-      // Add clone to page
+      // Add to body
       document.body.appendChild(clone)
 
-      // Wait a bit for rendering
+      // Wait
       await new Promise(resolve => setTimeout(resolve, 300))
 
-      // Use html2pdf
+      // Use html2pdf with simpler options
       const html2pdf = (await import('html2pdf.js')).default
 
       await html2pdf()
         .set({
-          margin: 5,
+          margin: 10,
           filename: 'portfolio.pdf',
           image: { type: 'jpeg', quality: 0.98 },
           html2canvas: { 
             scale: 2,
             useCORS: true,
-            backgroundColor: '#ffffff'
+            backgroundColor: '#ffffff',
+            logging: false
           },
           jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         })
