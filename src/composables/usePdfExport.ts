@@ -5,7 +5,7 @@ export function usePdfExport(
   showSnackbar: (text: string, color?: string) => void
 ) {
   const exportPdf = async () => {
-    console.log('PDF Export: Starting with jsPDF...')
+    console.log('PDF Export: Starting with dom-to-image...')
     
     try {
       showSnackbar('Generating PDF...', 'info')
@@ -26,23 +26,20 @@ export function usePdfExport(
 
       console.log('PDF Export: Found template')
 
-      // Import libraries
-      const html2canvasModule = await import('html2canvas')
+      // Import dom-to-image-more and jspdf
+      const domToImage = await import('dom-to-image-more')
       const jspdfModule = await import('jspdf')
-      
-      const html2canvas = html2canvasModule.default
       const { jsPDF } = jspdfModule
 
-      // Create canvas with high quality
-      const canvas = await html2canvas(templateContent, {
-        scale: 3,  // Higher scale = better quality
-        useCORS: true,
-        backgroundColor: '#ffffff',
-        logging: false,
-        windowWidth: 794
+      // Generate image from DOM
+      console.log('PDF Export: Generating image...')
+      const dataUrl = await domToImage.toJpeg(templateContent, {
+        quality: 1.0,
+        pixelRatio: 2,
+        backgroundColor: '#ffffff'
       })
 
-      console.log('PDF Export: Canvas created')
+      console.log('PDF Export: Image generated, creating PDF...')
 
       // Create PDF
       const pdf = new jsPDF({
@@ -52,34 +49,14 @@ export function usePdfExport(
       })
 
       // Calculate dimensions
-      const imgWidth = 210 // A4 width in mm
-      const pageHeight = 297 // A4 height in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width
-
-      // Add image to PDF
-      const imgData = canvas.toDataURL('image/jpeg', 1.0)
+      const pageWidth = 210
+      const pageHeight = 297
       
-      // If content fits on one page
-      if (imgHeight <= pageHeight) {
-        pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight)
-      } else {
-        // Multi-page
-        let heightLeft = imgHeight
-        let position = 0
-        
-        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight)
-        heightLeft -= pageHeight
-        
-        while (heightLeft > 0) {
-          position = heightLeft - imgHeight
-          pdf.addPage()
-          pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight)
-          heightLeft -= pageHeight
-        }
-      }
+      // Add image to PDF
+      pdf.addImage(dataUrl, 'JPEG', 0, 0, pageWidth, pageHeight)
 
       console.log('PDF Export: Saving...')
-
+      
       // Save
       pdf.save('portfolio.pdf')
       
