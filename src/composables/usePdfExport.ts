@@ -6,68 +6,70 @@ export function usePdfExport(
 ) {
   const exportPdf = async () => {
     try {
-      // Find the preview content
-      const previewContent = document.querySelector('.preview-card') as HTMLElement
-      if (!previewContent) {
-        showSnackbar('No preview content found', 'error')
+      const previewElement = document.querySelector('.preview-card') as HTMLElement
+      if (!previewElement) {
+        showSnackbar('No preview found', 'error')
         return
       }
 
-      // Clone the element for export
-      const clone = previewContent.cloneNode(true) as HTMLElement
+      // Show loading
+      showSnackbar('Generating PDF...', 'info')
+
+      // Import libraries
+      const html2canvasModule = await import('html2canvas')
+      const jspdfModule = await import('jspdf')
       
-      // Apply inline styles for clean PDF output
-      clone.style.position = 'fixed'
-      clone.style.left = '0'
+      const html2canvas = html2canvasModule.default
+      const { jsPDF } = jspdfModule
+
+      // Create a clone for export
+      const clone = previewElement.cloneNode(true) as HTMLElement
+      clone.style.position = 'absolute'
+      clone.style.left = '-9999px'
       clone.style.top = '0'
-      clone.style.width = '210mm'
-      clone.style.zIndex = '-1'
+      clone.style.width = '794px' // A4 width at 96 DPI
       clone.style.background = '#ffffff'
       
-      // Find the inner content and ensure it fills the page
-      const innerContent = clone.querySelector('[class*="min-h-screen"]') as HTMLElement
-      if (innerContent) {
-        innerContent.style.minHeight = '297mm'
-        innerContent.style.borderRadius = '0'
+      // Remove rounded corners
+      const content = clone.querySelector('[class*="min-h-screen"]') as HTMLElement
+      if (content) {
+        content.style.borderRadius = '0'
       }
       
-      // Add to DOM temporarily
       document.body.appendChild(clone)
-      
-      // Wait for DOM to render
-      await new Promise(resolve => setTimeout(resolve, 300))
 
-      // Dynamic import html2pdf
-      const html2pdfModule = await import('html2pdf.js')
-      const html2pdf = html2pdfModule.default
+      // Wait for render
+      await new Promise(resolve => setTimeout(resolve, 200))
 
-      const options = {
-        margin: 0,
-        filename: 'portfolio.pdf',
-        image: { type: 'jpeg', quality: 0.95 },
-        html2canvas: { 
-          scale: 2,
-          useCORS: true,
-          letterRendering: true,
-          backgroundColor: '#ffffff',
-          windowWidth: 794
-        },
-        jsPDF: { 
-          unit: 'mm', 
-          format: 'a4', 
-          orientation: 'portrait'
-        },
-        pagebreak: { mode: 'css', before: '.page-break' }
-      }
+      // Generate canvas
+      const canvas = await html2canvas(clone, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        windowWidth: 794,
+        logging: false
+      })
 
-      await html2pdf().set(options).from(clone).save()
-      
-      // Clean up
+      // Clean up clone
       document.body.removeChild(clone)
-      
+
+      // Create PDF
+      const imgData = canvas.toDataURL('image/jpeg', 0.95)
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      })
+
+      const imgWidth = 210 // A4 width in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width
+
+      pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight)
+      pdf.save('portfolio.pdf')
+
       showSnackbar('PDF exported!')
     } catch (error) {
-      console.error('PDF export error:', error)
+      console.error('PDF Error:', error)
       showSnackbar('Export failed: ' + (error as Error).message, 'error')
     }
   }
