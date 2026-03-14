@@ -1,45 +1,60 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-rose-400 via-orange-300 to-amber-200">
-    <section class="py-20 px-8 text-center">
-      <div class="inline-block mb-6">
-        <div class="w-40 h-40 mx-auto rounded-2xl bg-white shadow-2xl rotate-6 flex items-center justify-center text-6xl">{{ store.portfolio.avatar || '✨' }}</div>
-      </div>
-      <h1 class="text-5xl font-black text-gray-900 mb-3">{{ store.portfolio.name || 'Your Name' }}</h1>
-      <p class="text-2xl font-medium text-gray-800 mb-4">{{ store.portfolio.title || 'Creative Designer' }}</p>
-      <p class="text-lg text-gray-700 max-w-xl mx-auto mb-8">{{ store.portfolio.bio || 'Your creative bio...' }}</p>
-    </section>
+  <div class="preview-content min-h-screen bg-gradient-to-br from-rose-400 via-orange-300 to-amber-200">
+    <!-- Hero -->
+    <v-container fluid class="py-16 text-center">
+      <v-card rounded="xl" elevation="8" class="d-inline-block pa-2 mx-auto" style="transform: rotate(-3deg);">
+        <v-avatar size="120" color="white" class="">
+          <v-icon size="56">mdi-star</v-icon>
+        </v-avatar>
+      </v-card>
+      <h1 class="text-h2 font-weight-black mt-6 mb-2" style="color: #1f2937;">{{ store.portfolio.name || 'Your Name' }}</h1>
+      <p class="text-h5 font-weight-medium mb-4" style="color: #374151;">{{ store.portfolio.title || 'Creative Designer' }}</p>
+      <p class="text-body-1 mb-8 mx-auto" style="color: #4b5563; max-width: 600px;">{{ store.portfolio.bio || 'Your creative bio...' }}</p>
+    </v-container>
 
-    <section v-if="store.portfolio.projects.length" class="py-16 px-8 bg-white/50 backdrop-blur-sm">
-      <div class="max-w-5xl mx-auto">
-        <h2 class="text-3xl font-bold mb-8 text-center">Selected Works</h2>
-        <div class="grid md:grid-cols-2 gap-6">
-          <div v-for="(p, i) in store.portfolio.projects" :key="p.id" class="bg-white rounded-2xl p-6 shadow-lg" :class="i % 2 === 0 ? 'rotate-1' : '-rotate-1'">
-            <div class="h-40 bg-gradient-to-br from-rose-200 to-orange-200 rounded mb-4 flex items-center justify-center text-5xl">🎨</div>
-            <h3 class="font-bold text-xl mb-2">{{ p.title || 'Project' }}</h3>
-            <p class="text-gray-600 text-sm mb-4">{{ p.description }}</p>
-            <div class="flex flex-wrap gap-2 mb-2">
-              <span v-for="t in p.tags" :key="t" class="px-3 py-1 bg-rose-100 text-rose-700 text-xs rounded-full">{{ t }}</span>
-            </div>
-            <a v-if="p.link" :href="p.link" target="_blank" class="text-rose-600 font-medium">View →</a>
-          </div>
-        </div>
-      </div>
-    </section>
+    <!-- Projects -->
+    <v-container v-if="store.portfolio.projects.length" fluid class="py-12" style="background: rgba(255,255,255,0.5);">
+      <v-container>
+        <h2 class="text-h3 font-weight-bold mb-8 text-center" style="color: #1f2937;">Selected Works</h2>
+        <v-row>
+          <v-col v-for="(p, i) in store.portfolio.projects" :key="p.id" cols="12" md="6">
+            <v-card rounded="2xl" elevation="6" class="h-100" :style="{ transform: i % 2 === 0 ? 'rotate(1deg)' : 'rotate(-1deg)' }">
+              <div class="pa-8 text-center" style="background: linear-gradient(135deg, #fce7f3, #fed7aa);">
+                <v-icon size="56" color="rose-darken-2">mdi-palette</v-icon>
+              </div>
+              <v-card-title class="text-h5 font-weight-bold" style="color: #1f2937;">{{ p.title || 'Project' }}</v-card-title>
+              <v-card-text style="color: #6b7280;">{{ p.description }}</v-card-text>
+              <v-card-text>
+                <v-chip v-for="t in p.tags" :key="t" size="small" color="rose" class="mr-1 mb-1">{{ t }}</v-chip>
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-container>
 
-    <section v-if="store.portfolio.skills.length" class="py-16 px-8 bg-white/50 text-center">
-      <h2 class="text-3xl font-bold mb-8">Skills & Tools</h2>
-      <div class="flex flex-wrap justify-center gap-3">
-        <span v-for="s in store.portfolio.skills" :key="s.name" class="px-6 py-3 bg-white text-gray-800 rounded-full font-medium shadow-md">{{ s.name }}</span>
+    <!-- Skills -->
+    <v-container v-if="store.portfolio.skills.length" fluid class="py-12 text-center" style="background: rgba(255,255,255,0.5);">
+      <h2 class="text-h3 font-weight-bold mb-8" style="color: #1f2937;">Skills & Tools</h2>
+      <div class="d-flex flex-wrap justify-center ga-3">
+        <v-chip v-for="s in store.portfolio.skills" :key="s.name" size="x-large" class="ma-1" color="white" style="color: #1f2937; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+          {{ s.name }}
+        </v-chip>
       </div>
-    </section>
+    </v-container>
 
-    <section class="py-20 px-8 text-center">
-      <h2 class="text-4xl font-black text-gray-900 mb-4">Let's Create Together!</h2>
-      <p class="text-lg text-gray-700 mb-8">Have a project in mind?</p>
-      <a :href="`mailto:${store.portfolio.email}`" class="inline-block px-10 py-4 bg-gray-900 text-white font-bold rounded-full shadow-xl">Get In Touch 💌</a>
-    </section>
+    <!-- Contact -->
+    <v-container fluid class="py-16 text-center">
+      <h2 class="text-h3 font-weight-black mb-4" style="color: #1f2937;">Let's Create Together!</h2>
+      <p class="text-h6 mb-8" style="color: #4b5563;">Have a project in mind?</p>
+      <v-btn v-if="store.portfolio.email" :href="`mailto:${store.portfolio.email}`" 
+        size="x-large" rounded="full" color="grey-9" elevation="6">
+        <v-icon icon="mdi-email" class="mr-2"></v-icon>Get In Touch 💌
+      </v-btn>
+    </v-container>
   </div>
 </template>
+
 <script setup lang="ts">
 import { usePortfolioStore } from '../../../stores/portfolio'
 const store = usePortfolioStore()

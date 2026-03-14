@@ -1,55 +1,55 @@
 <template>
-  <div class="min-h-screen bg-gray-900 text-green-400 font-mono">
-    <section class="py-16 px-8">
-      <div class="max-w-3xl mx-auto">
-        <p class="text-green-500 mb-4">// Hello, World!</p>
-        <p class="text-white mb-4"><span class="text-green-500">const</span> developer = {</p>
-        <div class="pl-8 space-y-1 mb-4">
-          <p><span class="text-green-400">name:</span> <span class="text-yellow-300">"{{ store.portfolio.name || 'Your Name' }}"</span>,</p>
-          <p><span class="text-green-400">title:</span> <span class="text-yellow-300">"{{ store.portfolio.title || 'Developer' }}"</span>,</p>
-          <p><span class="text-green-400">location:</span> <span class="text-yellow-300">"{{ store.portfolio.location || 'Earth' }}"</span>,</p>
-        </div>
-        <p class="text-white">};</p>
-        <div class="mt-8 p-4 bg-green-900/20 rounded border border-green-800">
-          <p class="text-green-300">{{ store.portfolio.bio || '// Your bio goes here...' }}</p>
-        </div>
+  <div class="preview-content min-h-screen bg-grey-9" style="color: #4ade80; font-family: 'Courier New', monospace;">
+    <v-container class="py-16">
+      <p class="text-h6 mb-4" style="color: #22c55e;">// Hello, World!</p>
+      <p class="mb-4"><span style="color: #22c55e;">const</span> developer = {</p>
+      <div class="pl-8 mb-4">
+        <p><span style="color: #4ade80;">name:</span> <span style="color: #fde047;">"{{ store.portfolio.name || 'Your Name' }}"</span>,</p>
+        <p><span style="color: #4ade80;">title:</span> <span style="color: #fde047;">"{{ store.portfolio.title || 'Developer' }}"</span>,</p>
+        <p><span style="color: #4ade80;">location:</span> <span style="color: #fde047;">"{{ store.portfolio.location || 'Earth' }}"</span>,</p>
       </div>
-    </section>
+      <p class="mb-8">};</p>
+      
+      <v-card class="pa-4 mb-8" rounded="lg" style="background: rgba(34, 197, 94, 0.1); border: 1px solid #22c55e;">
+        <p style="color: #86efac;">{{ store.portfolio.bio || '// Your bio goes here...' }}</p>
+      </v-card>
 
-    <section v-if="store.portfolio.skills.length" class="py-12 px-8 bg-gray-800">
-      <div class="max-w-3xl mx-auto">
-        <p class="text-green-500 mb-4">// Technical Skills</p>
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
-          <div v-for="s in store.portfolio.skills" :key="s.name" class="p-2 bg-gray-900 rounded border border-green-800">
-            <span class="text-green-500">▸</span> <span class="text-white">{{ s.name }}</span>
+      <div v-if="store.portfolio.skills.length" class="mb-8">
+        <p class="mb-4" style="color: #22c55e;">// Technical Skills</p>
+        <v-row>
+          <v-col v-for="s in store.portfolio.skills" :key="s.name" cols="6" md="4">
+            <v-card class="pa-3" rounded="lg" style="background: #111827; border: 1px solid #22c55e;">
+              <span style="color: #22c55e;">▸</span> <span style="color: white;">{{ s.name }}</span>
+            </v-card>
+          </v-col>
+        </v-row>
+      </div>
+
+      <div v-if="store.portfolio.projects.length" class="mb-8">
+        <p class="mb-4" style="color: #22c55e;">// Projects</p>
+        <v-card v-for="p in store.portfolio.projects" :key="p.id" class="pa-4 mb-3" rounded="lg" style="background: #1f2937; border: 1px solid #22c55e;">
+          <div class="d-flex justify-space-between mb-2">
+            <span class="font-weight-bold" style="color: white;">{{ p.title || 'Project' }}</span>
+            <a v-if="p.link" :href="p.link" target="_blank" style="color: #4ade80;">[view]</a>
           </div>
-        </div>
-      </div>
-    </section>
-
-    <section v-if="store.portfolio.projects.length" class="py-12 px-8">
-      <div class="max-w-3xl mx-auto">
-        <p class="text-green-500 mb-4">// Projects</p>
-        <div v-for="p in store.portfolio.projects" :key="p.id" class="p-4 bg-gray-800 rounded-lg border border-green-800 mb-3">
-          <div class="flex justify-between mb-2">
-            <h3 class="font-bold text-white">{{ p.title || 'Project' }}</h3>
-            <a v-if="p.link" :href="p.link" target="_blank" class="text-green-400 text-sm">[view]</a>
+          <p class="text-grey mb-2">{{ p.description }}</p>
+          <div>
+            <v-chip v-for="t in p.tags" :key="t" size="x-small" class="mr-1" style="background: rgba(34, 197, 94, 0.2); color: #4ade80;">{{ t }}</v-chip>
           </div>
-          <p class="text-gray-400 text-sm mb-2">{{ p.description }}</p>
-          <div class="flex gap-2"><span v-for="t in p.tags" :key="t" class="px-2 py-0.5 bg-green-900/30 text-green-400 text-xs rounded">{{ t }}</span></div>
-        </div>
+        </v-card>
       </div>
-    </section>
 
-    <section class="py-12 px-8">
-      <div class="max-w-3xl mx-auto">
-        <p class="text-green-500 mb-4">// Contact</p>
-        <p class="text-gray-400 mb-4">// Let's build something together!</p>
-        <a :href="`mailto:${store.portfolio.email}`" class="inline-block px-6 py-3 bg-green-600 text-white rounded hover:bg-green-500">sendMail("{{ store.portfolio.email }}")</a>
+      <div class="text-center py-8">
+        <p style="color: #22c55e;">// Contact</p>
+        <p class="mb-4 text-grey">// Let's build something together!</p>
+        <v-btn v-if="store.portfolio.email" :href="`mailto:${store.portfolio.email}`" color="green" rounded="lg">
+          sendMail("{{ store.portfolio.email }}")
+        </v-btn>
       </div>
-    </section>
+    </v-container>
   </div>
 </template>
+
 <script setup lang="ts">
 import { usePortfolioStore } from '../../../stores/portfolio'
 const store = usePortfolioStore()

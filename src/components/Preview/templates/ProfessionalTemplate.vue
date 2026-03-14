@@ -1,55 +1,66 @@
 <template>
-  <div class="min-h-screen bg-white">
-    <header class="bg-slate-800 text-white py-16 px-8">
-      <div class="max-w-4xl mx-auto flex items-center gap-6">
-        <div class="w-24 h-24 rounded-full bg-slate-700 flex items-center justify-center text-4xl">{{ store.portfolio.avatar || '👔' }}</div>
+  <div class="preview-content min-h-screen bg-white">
+    <!-- Header -->
+    <v-app-bar color="blue-grey-darken-4" flat>
+      <v-container class="d-flex align-center">
+        <v-avatar color="blue-grey-lighten-3" size="56" class="mr-4">
+          <v-icon>mdi-account</v-icon>
+        </v-avatar>
         <div>
-          <h1 class="text-3xl font-bold mb-1">{{ store.portfolio.name || 'Your Name' }}</h1>
-          <p class="text-slate-300 text-lg mb-2">{{ store.portfolio.title || 'Your Title' }}</p>
-          <p class="text-slate-400 text-sm">{{ store.portfolio.location }} • {{ store.portfolio.email }}</p>
+          <div class="text-h6 font-weight-bold">{{ store.portfolio.name || 'Your Name' }}</div>
+          <div class="text-body-2 opacity-70">{{ store.portfolio.title }}</div>
         </div>
-      </div>
-      <p class="mt-6 text-slate-300 max-w-2xl mx-auto">{{ store.portfolio.bio || 'Your bio...' }}</p>
-    </header>
-
-    <section v-if="store.portfolio.skills.length" class="bg-slate-100 py-4 px-8 border-b">
-      <div class="max-w-4xl mx-auto flex flex-wrap gap-2">
-        <span v-for="s in store.portfolio.skills" :key="s.name" class="px-3 py-1 bg-white border text-sm rounded">{{ s.name }}</span>
-      </div>
-    </section>
-
-    <section v-if="store.portfolio.projects.length" class="py-12 px-8">
-      <div class="max-w-4xl mx-auto">
-        <h2 class="text-2xl font-bold mb-6 pb-2 border-b">Projects</h2>
-        <div v-for="p in store.portfolio.projects" :key="p.id" class="flex gap-6 p-6 border rounded-lg mb-4">
-          <div class="w-32 h-24 bg-slate-100 rounded shrink-0 flex items-center justify-center text-3xl">💼</div>
-          <div>
-            <h3 class="font-semibold text-lg">{{ p.title || 'Project' }}</h3>
-            <p class="text-slate-600 text-sm mb-2">{{ p.description }}</p>
-            <div class="flex gap-2"><span v-for="t in p.tags" :key="t" class="px-2 py-0.5 bg-slate-100 text-xs rounded">{{ t }}</span></div>
+        <v-spacer></v-spacer>
+        <div class="text-right">
+          <div v-if="store.portfolio.location" class="text-body-2">
+            <v-icon size="small" class="mr-1">mdi-map-marker</v-icon>{{ store.portfolio.location }}
+          </div>
+          <div v-if="store.portfolio.email" class="text-body-2">
+            <v-icon size="small" class="mr-1">mdi-email</v-icon>{{ store.portfolio.email }}
           </div>
         </div>
-      </div>
-    </section>
+      </v-container>
+    </v-app-bar>
 
-    <section v-if="store.portfolio.experience.length" class="py-12 px-8 bg-slate-50">
-      <div class="max-w-4xl mx-auto">
-        <h2 class="text-2xl font-bold mb-6 pb-2 border-b">Experience</h2>
-        <div v-for="e in store.portfolio.experience" :key="e.id" class="flex gap-4 mb-4">
-          <div class="w-32 text-sm text-slate-500 shrink-0">{{ e.startDate }} - {{ e.current ? 'Present' : e.endDate }}</div>
-          <div class="border-l-2 border-slate-300 pl-4">
-            <h3 class="font-semibold">{{ e.role || 'Role' }}</h3>
-            <p class="text-slate-600 text-sm">{{ e.company || 'Company' }}</p>
-          </div>
-        </div>
-      </div>
-    </section>
+    <v-container class="py-8">
+      <p class="text-body-1 mb-8" style="max-width: 800px;">{{ store.portfolio.bio || 'Your bio...' }}</p>
 
-    <section class="py-12 px-8 text-center">
-      <a :href="`mailto:${store.portfolio.email}`" class="inline-block px-6 py-3 bg-slate-800 text-white rounded-lg">Send Message</a>
-    </section>
+      <!-- Skills -->
+      <div v-if="store.portfolio.skills.length" class="mb-8">
+        <v-chip v-for="s in store.portfolio.skills" :key="s.name" variant="outlined" class="ma-1">{{ s.name }}</v-chip>
+      </div>
+
+      <!-- Projects -->
+      <div v-if="store.portfolio.projects.length" class="mb-8">
+        <v-divider class="mb-6"></v-divider>
+        <h2 class="text-h4 font-weight-bold mb-6">Projects</h2>
+        <v-card v-for="p in store.portfolio.projects" :key="p.id" class="mb-4" rounded="lg" elevation="1">
+          <v-row no-gutters>
+            <v-col cols="12" md="3" class="pa-4 bg-grey-lighten-4">
+              <v-icon size="40" color="blue-grey">mdi-briefcase</v-icon>
+            </v-col>
+            <v-col cols="12" md="9">
+              <v-card-title class="font-weight-bold">{{ p.title || 'Project' }}</v-card-title>
+              <v-card-text>{{ p.description }}</v-card-text>
+              <v-card-text>
+                <v-chip v-for="t in p.tags" :key="t" size="small" class="mr-1">{{ t }}</v-chip>
+              </v-card-text>
+            </v-col>
+          </v-row>
+        </v-card>
+      </div>
+    </v-container>
+
+    <!-- Contact -->
+    <v-container fluid class="py-8 text-center bg-grey-lighten-4">
+      <h2 class="text-h4 font-weight-bold mb-4">Contact</h2>
+      <v-btn v-if="store.portfolio.email" :href="`mailto:${store.portfolio.email}`" color="blue-grey-darken-4" size="large" rounded="lg">
+        <v-icon icon="mdi-send" class="mr-2"></v-icon>Send Message
+      </v-btn>
+    </v-container>
   </div>
 </template>
+
 <script setup lang="ts">
 import { usePortfolioStore } from '../../../stores/portfolio'
 const store = usePortfolioStore()
