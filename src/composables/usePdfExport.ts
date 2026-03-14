@@ -5,74 +5,64 @@ export function usePdfExport(
   showSnackbar: (text: string, color?: string) => void
 ) {
   const exportPdf = async () => {
-    console.log('PDF Export: Starting...')
-    
     try {
-      showSnackbar('Generating PDF...', 'info')
-
+      // Find the preview card
       const previewCard = document.querySelector('.preview-card')
-      console.log('PDF Export: previewCard found:', !!previewCard)
-      
       if (!previewCard) {
         showSnackbar('No preview found', 'error')
         return
       }
 
-      // Get the template content - the actual portfolio
+      // Get the template content
       const templateContent = previewCard.querySelector('[class*="min-h-screen"]') as HTMLElement
-      
       if (!templateContent) {
-        showSnackbar('No template content found', 'error')
+        showSnackbar('No template found', 'error')
         return
       }
-      
-      console.log('PDF Export: templateContent found')
 
-      // Clone the element
+      // Create a clone for printing
       const clone = templateContent.cloneNode(true) as HTMLElement
       
-      // Just set position, let original CSS work
-      clone.style.position = 'fixed'
-      clone.style.left = '-9999px'
-      clone.style.top = '0'
+      // Remove all fixed/absolute positioning for print
+      clone.style.position = 'static'
+      clone.style.left = 'auto'
+      clone.style.top = 'auto'
       
-      // Only remove classes from root, keep children classes
-      clone.removeAttribute('class')
+      // Remove classes but keep structure
+      const removeClasses = (el: Element) => {
+        (el as HTMLElement).removeAttribute('class')
+        Array.from(el.children).forEach(removeClasses)
+      }
+      removeClasses(clone)
       
+      // Replace the body with just our content
+      const originalBody = document.body.innerHTML
+      document.body.innerHTML = ''
       document.body.appendChild(clone)
-      console.log('PDF Export: Clone added')
       
-      await new Promise(resolve => setTimeout(resolve, 500))
+      // Add print styles
+      const style = document.createElement('style')
+      style.textContent = `
+        @media print {
+          body { margin: 0; padding: 20mm; }
+          @page { margin: 0; size: A4; }
+        }
+      `
+      document.head.appendChild(style)
       
-      // Use html2pdf
-      const html2pdfModule = await import('html2pdf.js')
-      const html2pdf = html2pdfModule.default
+      // Trigger print dialog
+      window.print()
       
-      await html2pdf()
-        .set({
-          margin: 10,
-          filename: 'portfolio.pdf',
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: { 
-            scale: 1,  // Use scale 1 for better accuracy
-            useCORS: true,
-            backgroundColor: '#ffffff',
-            logging: false,
-            windowWidth: 794
-          },
-          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        })
-        .from(clone)
-        .save()
-
-      document.body.removeChild(clone)
-      console.log('PDF Export: Complete!')
+      // Restore original body after print dialog closes
+      setTimeout(() => {
+        document.body.innerHTML = originalBody
+        style.remove()
+      }, 1000)
       
-      showSnackbar('PDF exported! Check downloads folder.')
-      
+      showSnackbar('Use "Save as PDF" in print dialog!')
     } catch (error) {
-      console.error('PDF Export Error:', error)
-      showSnackbar('Export failed: ' + (error as Error).message, 'error')
+      console.error('Print Error:', error)
+      showSnackbar('Print failed: ' + (error as Error).message, 'error')
     }
   }
 
