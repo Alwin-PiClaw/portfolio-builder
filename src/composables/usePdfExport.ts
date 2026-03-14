@@ -5,62 +5,74 @@ export function usePdfExport(
   showSnackbar: (text: string, color?: string) => void
 ) {
   const exportPdf = async () => {
-    console.log('PDF Export: Starting with dom-to-image...')
+    console.log('PDF Export: Starting...')
     
     try {
       showSnackbar('Generating PDF...', 'info')
 
-      // Find the preview content
+      // Find the preview card
       const previewCard = document.querySelector('.preview-card')
+      console.log('PDF Export: previewCard found:', !!previewCard)
+      
       if (!previewCard) {
         showSnackbar('No preview found', 'error')
         return
       }
 
-      // Get template content
+      // Find the template content
       const templateContent = previewCard.querySelector('[class*="min-h-screen"]') as HTMLElement
       if (!templateContent) {
         showSnackbar('No template found', 'error')
         return
       }
-
-      console.log('PDF Export: Found template')
-
-      // Import dom-to-image-more and jspdf
-      const domToImage = await import('dom-to-image-more')
-      const jspdfModule = await import('jspdf')
-      const { jsPDF } = jspdfModule
-
-      // Generate image from DOM
-      console.log('PDF Export: Generating image...')
-      const dataUrl = await domToImage.toJpeg(templateContent, {
-        quality: 1.0,
-        pixelRatio: 2,
-        backgroundColor: '#ffffff'
-      })
-
-      console.log('PDF Export: Image generated, creating PDF...')
-
-      // Create PDF
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      })
-
-      // Calculate dimensions
-      const pageWidth = 210
-      const pageHeight = 297
       
-      // Add image to PDF
-      pdf.addImage(dataUrl, 'JPEG', 0, 0, pageWidth, pageHeight)
+      console.log('PDF Export: template found')
 
-      console.log('PDF Export: Saving...')
+      // Clone and prepare
+      const clone = templateContent.cloneNode(true) as HTMLElement
       
-      // Save
-      pdf.save('portfolio.pdf')
+      // Simple styling - just position it offscreen
+      clone.style.position = 'fixed'
+      clone.style.left = '-9999px'
+      clone.style.top = '0'
       
+      // Remove class to use computed styles
+      const stripClasses = (el: Element) => {
+        (el as HTMLElement).removeAttribute('class')
+        Array.from(el.children).forEach(stripClasses)
+      }
+      stripClasses(clone)
+      
+      document.body.appendChild(clone)
+      console.log('PDF Export: Clone added')
+      
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      // Use html2pdf.js
+      const html2pdfModule = await import('html2pdf.js')
+      const html2pdf = html2pdfModule.default
+      
+      console.log('PDF Export: Generating PDF...')
+      
+      await html2pdf()
+        .set({
+          margin: 0,
+          filename: 'portfolio.pdf',
+          image: { type: 'jpeg', quality: 1.0 },
+          html2canvas: { 
+            scale: 1,
+            useCORS: true,
+            backgroundColor: '#ffffff',
+            windowWidth: 794
+          },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        })
+        .from(clone)
+        .save()
+
+      document.body.removeChild(clone)
       console.log('PDF Export: Complete!')
+      
       showSnackbar('PDF exported!')
       
     } catch (error) {

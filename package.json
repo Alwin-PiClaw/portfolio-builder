@@ -14,6 +14,7 @@
     "dom-to-image-more": "^3.7.2",
     "html2pdf.js": "^0.10.1",
     "jspdf": "^4.2.0",
+    "pdfmake": "^0.3.6",
     "pinia": "^2.1.7",
     "vue": "^3.4.0",
     "vue-i18n": "^11.3.0",
