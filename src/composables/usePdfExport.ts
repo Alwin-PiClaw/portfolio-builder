@@ -8,31 +8,54 @@ export function usePdfExport(
     console.log('PDF Export: Starting...')
     
     try {
-      // Find the preview card
-      const previewCard = document.querySelector('.preview-card')
-      console.log('PDF Export: previewCard found:', !!previewCard)
+      // Find ONLY the preview section (right side of the screen)
+      // The preview is in the second v-col, we need to find just the preview content
+      const previewArea = document.querySelector('.preview-card')
+      console.log('PDF Export: previewArea found:', !!previewArea)
       
-      if (!previewCard) {
+      if (!previewArea) {
         showSnackbar('No preview found', 'error')
         return
       }
 
-      // Get the first child (the template component)
-      const templateContent = previewCard.children[0] as HTMLElement
-      console.log('PDF Export: templateContent found:', !!templateContent, 'tag:', templateContent?.tagName)
+      // Get the actual portfolio template content - skip the wrapper v-card
+      // Look for elements that are part of the portfolio itself
+      const templateContent = previewArea.querySelector('div[class*="min-h-screen"]') as HTMLElement
       
       if (!templateContent) {
+        // Fallback: use first div that's a direct child
+        const children = previewArea.querySelectorAll(':scope > *')
+        for (const child of children) {
+          const el = child as HTMLElement
+          // Skip if it's a transition or wrapper
+          if (el.tagName !== 'SCRIPT' && el.style.position !== 'fixed') {
+            console.log('PDF Export: Using fallback element:', el.tagName)
+            return generatePdf(el as HTMLElement, showSnackbar)
+          }
+        }
         showSnackbar('No template content found', 'error')
         return
       }
-
-      showSnackbar('Generating PDF...', 'info')
-      console.log('PDF Export: Creating clone...')
-
-      // Clone the template content
-      const clone = templateContent.cloneNode(true) as HTMLElement
       
-      // Set clean styles for A4
+      console.log('PDF Export: templateContent found:', !!templateContent)
+      
+      await generatePdf(templateContent, showSnackbar)
+      
+    } catch (error) {
+      console.error('PDF Export Error:', error)
+      showSnackbar('Export failed: ' + (error as Error).message, 'error')
+    }
+  }
+
+  const generatePdf = async (element: HTMLElement, showSnackbar: (text: string, color?: string) => void) => {
+    try {
+      showSnackbar('Generating PDF...', 'info')
+      console.log('PDF Export: Creating clean clone...')
+
+      // Clone the element
+      const clone = element.cloneNode(true) as HTMLElement
+      
+      // Set clean A4 styles
       clone.style.cssText = `
         position: fixed;
         left: -9999px;
@@ -43,26 +66,24 @@ export function usePdfExport(
         background: white;
         box-sizing: border-box;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        color: #333333;
+        line-height: 1.6;
       `
       
-      // Remove class attributes from all elements
-      const removeClasses = (el: Element) => {
+      // Remove ALL class attributes
+      const stripClasses = (el: Element) => {
         (el as HTMLElement).removeAttribute('class')
-        Array.from(el.children).forEach(child => removeClasses(child))
+        Array.from(el.children).forEach(child => stripClasses(child))
       }
-      removeClasses(clone)
+      stripClasses(clone)
       
       document.body.appendChild(clone)
-      console.log('PDF Export: Clone added to DOM')
+      console.log('PDF Export: Clone added')
       
-      // Wait for render
       await new Promise(resolve => setTimeout(resolve, 500))
-      console.log('PDF Export: Rendering html2pdf...')
       
-      // Use html2pdf
       const html2pdfModule = await import('html2pdf.js')
       const html2pdf = html2pdfModule.default
-      console.log('PDF Export: html2pdf loaded')
       
       await html2pdf()
         .set({
@@ -82,15 +103,13 @@ export function usePdfExport(
         .from(clone)
         .save()
 
-      console.log('PDF Export: Save complete')
-      
-      // Cleanup
       document.body.removeChild(clone)
+      console.log('PDF Export: Complete!')
       
       showSnackbar('PDF exported!')
     } catch (error) {
-      console.error('PDF Export Error:', error)
-      showSnackbar('Export failed: ' + (error as Error).message, 'error')
+      console.error('Generate PDF Error:', error)
+      throw error
     }
   }
 
